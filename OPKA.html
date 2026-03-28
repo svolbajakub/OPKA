@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title> OPERATIVNÍ KARTY - ZZS ÚK, p.o. </title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5; --card-bg: #ffffff; --text-main: #111111;
+            --text-sub: #444444; --accent: #d32f2f; --row-bg: #f9f9f9;
+            --border: #cfd8dc; --rizika-bg: #fff3e0; --rizika-border: #ff9800;
+            --route-bg: #e3f2fd; --route-border: #1565c0; --char-bg: #eceff1;
+            --char-border: #607d8b; --methane-bg: #37474f; --bulb-glow: rgba(255, 235, 59, 0.5);
+        }
+        body.dark-mode {
+            --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #eeeeee;
+            --text-sub: #bbbbbb; --accent: #ff5252; --row-bg: #2c2c2c;
+            --border: #444444; --rizika-bg: #332715; --rizika-border: #e65100;
+            --route-bg: #0d1b2a; --route-border: #1e88e5; --char-bg: #263238;
+            --char-border: #90a4ae; --methane-bg: #263238; --bulb-glow: rgba(255, 235, 59, 0.8);
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 10px; transition: 0.3s; }
+        .container { width: 96%; max-width: 1200px; margin: 10px auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.2); overflow: hidden; min-height: 90vh; }
+        
+        .header { background: #d32f2f; color: white; padding: 20px; text-align: center; border-bottom: 4px solid #ffeb3b; position: relative; }
+        .theme-switch { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75em; }
+        
+        .search-box { padding: 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+        .input-wrapper { position: relative; max-width: 800px; margin: auto; }
+        input { width: 100%; padding: 18px 50px 18px 20px; box-sizing: border-box; border: 2px solid var(--border); border-radius: 10px; font-size: 22px; background: var(--row-bg); color: var(--text-main); }
+        #clearBtn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 32px; color: #999; display: none; width: 40px; text-align: center; }
+
+        .methane-container { max-width: 800px; margin: 0 auto 15px auto; padding: 0 20px; }
+        .methane-header { background: var(--methane-bg); color: white; padding: 12px 15px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-left: 5px solid #ffeb3b; }
+        .methane-content { display: none; background: var(--row-bg); border: 1px solid var(--border); border-radius: 0 0 8px 8px; padding: 15px; margin-top: -2px; }
+        .methane-item { margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; display: flex; align-items: baseline; }
+        .methane-letter { color: var(--accent); font-weight: bold; font-size: 1.2em; min-width: 25px; }
+        .bulb { filter: drop-shadow(0 0 5px var(--bulb-glow)); margin-right: 8px; font-style: normal; }
+
+        .quick-access { max-width: 800px; margin: 10px auto; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { padding: 10px 18px; background: var(--row-bg); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 1em; transition: 0.2s; }
+        .chip:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        
+        #seznam { list-style: none; padding: 0; margin: 0; max-height: 500px; overflow-y: auto; display: none; }
+        #seznam li { padding: 18px 25px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 1.2em; }
+        
+        .karta { display: none; padding: 20px; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .v-nazev { color: var(--accent); margin: 0 0 15px 0; border-bottom: 3px solid var(--accent); padding-bottom: 10px; font-size: 1.8em; }
+
+        /* GRID ROZLOŽENÍ */
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+        .full-width { grid-column: span 2; }
+        .info-row { padding: 12px 15px; background: var(--row-bg); border-radius: 8px; border-left: 4px solid var(--border); }
+        .label { font-weight: bold; color: var(--accent); display: block; font-size: 0.75em; text-transform: uppercase; margin-bottom: 2px; }
+        
+        .hodnota { font-size: 1.1em; line-height: 1.4; display: block; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+
+        .charakter-box { border-left: 8px solid var(--char-border); background: var(--char-bg); }
+        .trasa-box { border-left: 8px solid var(--route-border); background: var(--route-bg); }
+        .rizika-box { border-left: 8px solid var(--rizika-border); background: var(--rizika-bg); }
+        
+        .btn-mapa { display: block; width: 100%; max-width: 400px; margin: 20px auto 0; padding: 18px; background: #1a237e; color: white; text-align: center; cursor: pointer; border-radius: 10px; font-weight: bold; font-size: 1.2em; border: none; }
+
+        /* MODÁL - GALERIE */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); align-items: center; justify-content: center; overflow: hidden; }
+        .modal-content { max-width: 98%; max-height: 98vh; transition: transform 0.1s ease-out; cursor: grab; }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: #d32f2f; color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 45px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(0,0,0,0.7); border: 3px solid white; z-index: 10001; line-height: 0; padding-bottom: 6px; user-select: none; }
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; font-size: 50px; padding: 20px; cursor: pointer; user-select: none; border-radius: 10px; z-index: 10002; transition: 0.2s; }
+        .nav-arrow:hover { background: rgba(255,255,255,0.3); }
+        .arrow-left { left: 10px; } .arrow-right { right: 10px; }
+        .modal-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; font-size: 1.2em; z-index: 10002; }
+
+        .footer { padding: 20px; text-align: center; font-size: 0.8em; color: var(--text-sub); }
+
+        @media (max-width: 600px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .modal-close { width: 55px; height: 55px; font-size: 35px; top: 15px; right: 15px; }
+            .nav-arrow { padding: 10px; font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="myModal" class="modal" onclick="closeModal()">
+    <div class="modal-close" onclick="closeModal()">&times;</div>
+    <div id="btnPrev" class="nav-arrow arrow-left" onclick="changeImage(-1, event)">&#10094;</div>
+    <img class="modal-content" id="img01" onclick="event.stopPropagation()">
+    <div id="btnNext" class="nav-arrow arrow-right" onclick="changeImage(1, event)">&#10095;</div>
+    <div id="modalCounter" class="modal-counter"></div>
+</div>
+
+<div class="container">
+    <div class="header">
+        <button class="theme-switch" id="themeBtn" onclick="toggleTheme()">🌙 TMAVÝ REŽIM</button>
+        <h2> <b> OPERATIVNÍ KARTY </b> <br> Zdravotnická záchranná služba Ústeckého kraje, p.o. </h2>
+    </div>
+    
+    <div class="search-box">
+        <div class="input-wrapper">
+            <input type="text" id="hledat" placeholder="Hledej firmu nebo okres..." oninput="filtrovat()" autocomplete="off">
+            <span id="clearBtn" onclick="smazatHledani()">✕</span>
+        </div>
+    </div>
+
+    <div class="methane-container">
+        <div class="methane-header" onclick="toggleMethane()">
+            <span><i class="bulb">💡</i> Nápověda hlášení METHANE</span>
+            <span id="methane-icon">▼</span>
+        </div>
+        <div id="methane-content" class="methane-content">
+            <div class="methane-item"><span class="methane-letter">M</span><span><b>Můj volací znak:</b> např. ZUL 123</span></div>
+            <div class="methane-item"><span class="methane-letter">E</span><span><b>Exaktní místo události:</b> adresa, kilometrovník...</span></div>
+            <div class="methane-item"><span class="methane-letter">T</span><span><b>Type události:</b> požár, výbuch, NL...</span></div>
+            <div class="methane-item"><span class="methane-letter">H</span><span><b>Hrozící rizika:</b> přítomná i potenciální</span></div>
+            <div class="methane-item"><span class="methane-letter">A</span><span><b>Aktuální přístup:</b> vjezd, brána...</span></div>
+            <div class="methane-item"><span class="methane-letter">N</span><span><b>Numerický odhad počtu zraněných</b></span></div>
+            <div class="methane-item"><span class="methane-letter">E</span><span><b>Emergentní složky:</b> další síly a prostředky</span></div>
+        </div>
+    </div>
+
+    <div id="quickAccess" class="quick-access"></div>
+    <ul id="seznam"></ul>
+
+    <div id="vypis" class="karta">
+        <h3 id="v-nazev" class="v-nazev"></h3>
+        <div class="info-grid">
+            <div class="info-row"><span class="label">📍 Adresa:</span><span id="v-adresa" class="hodnota"></span></div>
+            <div class="info-row"><span class="label">📞 Kontakt:</span><span id="v-kontakt" class="hodnota"></span></div>
+            
+            <div class="info-row"><span class="label">🕒 Provoz:</span><span id="v-doba" class="hodnota"></span></div>
+            <div class="info-row"><span class="label">👥 Zaměstnanci:</span><span id="v-zamestnanci" class="hodnota"></span></div>
+            
+            <div class="info-row full-width charakter-box"><span class="label" style="color:var(--char-border)">🏢 Charakter objektu:</span><span id="v-charakter" class="hodnota"></span></div>
+
+            <div class="info-row full-width trasa-box"><span class="label" style="color:var(--route-border)">🚛 Přístupová cesta:</span><span id="v-trasa" class="hodnota"></span></div>
+            <div class="info-row full-width rizika-box"><span class="label">⚠️ Rizika:</span><span id="v-rizika" class="hodnota"></span></div>
+        </div>
+        <button id="v-mapa-btn" onclick="openModal()" class="btn-mapa">🗺️ Zobrazit dokumentaci / plánek</button>
+    </div>
+    
+    <div class="footer" id="status">Načítám...</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+    const okresyUK = ["Děčín", "Chomutov", "Litoměřice", "Louny", "Most", "Teplice", "Ústí n. L."];
+    let currentMapUrls = [];
+    let currentIdx = 0;
+    let scale = 1;
+
+    function openModal() {
+        if (currentMapUrls.length === 0) return;
+        const modal = document.getElementById("myModal");
+        currentIdx = 0; scale = 1;
+        updateModalContent();
+        modal.style.display = "flex";
+    }
+
+    function updateModalContent() {
+        const modalImg = document.getElementById("img01");
+        const counter = document.getElementById("modalCounter");
+        modalImg.src = "mapy/" + currentMapUrls[currentIdx];
+        modalImg.style.transform = `scale(${scale})`;
+        counter.textContent = `${currentIdx + 1} / ${currentMapUrls.length}`;
+        document.getElementById("btnPrev").style.display = currentMapUrls.length > 1 ? "block" : "none";
+        document.getElementById("btnNext").style.display = currentMapUrls.length > 1 ? "block" : "none";
+    }
+
+    function changeImage(dir, e) { e.stopPropagation(); currentIdx += dir; if (currentIdx >= currentMapUrls.length) currentIdx = 0; if (currentIdx < 0) currentIdx = currentMapUrls.length - 1; scale = 1; updateModalContent(); }
+    function closeModal() { document.getElementById("myModal").style.display = "none"; }
+
+    const modalImg = document.getElementById("img01");
+    modalImg.addEventListener('wheel', e => { e.preventDefault(); scale += e.deltaY * -0.001; scale = Math.min(Math.max(.5, scale), 4); modalImg.style.transform = `scale(${scale})`; }, {passive: false});
+
+    function toggleMethane() { const c = document.getElementById('methane-content'); const i = document.getElementById('methane-icon'); const v = c.style.display === "block"; c.style.display = v ? "none" : "block"; i.textContent = v ? "▼" : "▲"; }
+    function toggleTheme() { const isDark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); document.getElementById('themeBtn').textContent = isDark ? '☀️ SVĚTLÝ REŽIM' : '🌙 TMAVÝ REŽIM'; }
+    if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark-mode'); document.getElementById('themeBtn').textContent = '☀️ SVĚTLÝ REŽIM'; }
+
+    function init() { if (typeof firmy !== 'undefined') { firmy.sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs')); document.getElementById('status').textContent = `Databáze: ${firmy.length} objektů.`; vykresliOkresy(); } }
+    function vykresliOkresy() { const c = document.getElementById('quickAccess'); c.innerHTML = ''; okresyUK.forEach(o => { const chip = document.createElement('div'); chip.className = 'chip'; chip.textContent = o; chip.onclick = () => { document.getElementById('hledat').value = o; filtrovat(); }; c.appendChild(chip); }); }
+
+    function filtrovat() {
+        const input = document.getElementById('hledat'); const hledej = input.value.toLowerCase().trim();
+        const ul = document.getElementById('seznam'); const karta = document.getElementById('vypis');
+        const clearBtn = document.getElementById('clearBtn'); const qa = document.getElementById('quickAccess');
+        clearBtn.style.display = input.value.length > 0 ? 'block' : 'none'; ul.innerHTML = '';
+        if (hledej.length < 1) { ul.style.display = 'none'; karta.style.display = 'none'; qa.style.display = 'flex'; return; }
+        qa.style.display = 'none';
+        const vysledek = firmy.filter(f => f.nazev.toLowerCase().includes(hledej) || f.adresa.toLowerCase().includes(hledej) || f.okres.toLowerCase().includes(hledej));
+        if (vysledek.length > 0) { ul.style.display = 'block'; vysledek.slice(0, 20).forEach(f => { const li = document.createElement('li'); li.textContent = f.nazev; li.onclick = () => zobraz(f); ul.appendChild(li); }); }
+    }
+
+    function zobraz(f) {
+        document.getElementById('seznam').style.display = 'none';
+        document.getElementById('vypis').style.display = 'block';
+        document.getElementById('v-nazev').textContent = f.nazev;
+
+        document.getElementById('v-adresa').innerHTML = f.adresa;
+        document.getElementById('v-kontakt').innerHTML = f.kontakt;
+        document.getElementById('v-zamestnanci').innerHTML = f.zamestnanci;
+        document.getElementById('v-doba').innerHTML = f.doba;
+        document.getElementById('v-charakter').innerHTML = f.charakter || "Neuvedeno";
+        document.getElementById('v-trasa').innerHTML = f.trasa;
+        document.getElementById('v-rizika').innerHTML = f.rizika;
+
+        if (!f.mapa) currentMapUrls = [];
+        else if (Array.isArray(f.mapa)) currentMapUrls = f.mapa;
+        else currentMapUrls = [f.mapa];
+        
+        document.getElementById('v-mapa-btn').style.display = currentMapUrls.length > 0 ? "block" : "none";
+        window.scrollTo(0,0);
+    }
+
+    function smazatHledani() { document.getElementById('hledat').value = ''; document.getElementById('vypis').style.display = 'none'; document.getElementById('seznam').style.display = 'none'; document.getElementById('quickAccess').style.display = 'flex'; document.getElementById('clearBtn').style.display = 'none'; }
+    init();
+</script>
+</body>
+</html>

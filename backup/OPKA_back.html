@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZZS ÚK - Operativní karty</title>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .container { max-width: 700px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.2); overflow: hidden; }
+        
+        .header { background: #d32f2f; color: white; padding: 20px; text-align: center; border-bottom: 4px solid #ffeb3b; }
+        .header h2 { margin: 0; font-size: 1.3em; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .search-box { padding: 20px; background: #fff; }
+        input { width: 100%; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 8px; font-size: 20px; transition: 0.3s; }
+        input:focus { border-color: #d32f2f; outline: none; box-shadow: 0 0 8px rgba(211, 47, 47, 0.3); }
+        
+        #seznam { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; display: none; border-top: 1px solid #eee; }
+        #seznam li { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 1.1em; color: #333; }
+        #seznam li:hover { background: #fff5f5; color: #d32f2f; font-weight: bold; }
+        
+        .karta { display: none; padding: 20px; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .v-nazev { color: #d32f2f; margin: 0 0 15px 0; border-bottom: 2px solid #d32f2f; padding-bottom: 8px; font-size: 1.6em; line-height: 1.2; }
+        
+        .info-row { margin-bottom: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #cfd8dc; }
+        .label { font-weight: bold; color: #d32f2f; display: block; font-size: 0.8em; text-transform: uppercase; margin-bottom: 4px; }
+        .hodnota { font-size: 1.15em; color: #111; line-height: 1.4; }
+        
+        .rizika-box { border-left: 6px solid #ff9800; background: #fff3e0; }
+
+        /* Tlačítko na mapu */
+        .btn-mapa { 
+            display: block; width: 100%; padding: 15px; margin-top: 20px; 
+            background: #1a237e; color: white; text-align: center; 
+            text-decoration: none; border-radius: 8px; font-weight: bold; 
+            text-transform: uppercase; font-size: 1.1em; transition: 0.2s;
+        }
+        .btn-mapa:hover { background: #0d47a1; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        .footer { padding: 10px; text-align: center; font-size: 0.8em; color: #888; background: #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>ZZS ÚK - Operativní karty</h2>
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="hledat" placeholder="Hledej firmu/objekt..." oninput="filtrovat()" autocomplete="off">
+    </div>
+    
+    <ul id="seznam"></ul>
+
+    <div id="vypis" class="karta">
+        <h3 id="v-nazev" class="v-nazev"></h3>
+        
+        <div class="info-row">
+            <span class="label">📍 Adresa:</span>
+            <span id="v-adresa" class="hodnota"></span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">📞 Kontaktní osoba:</span>
+            <span id="v-kontakt" class="hodnota"></span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">👥 Zaměstnanci / Kapacita:</span>
+            <span id="v-zamestnanci" class="hodnota"></span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">🕒 Provozní doba:</span>
+            <span id="v-doba" class="hodnota"></span>
+        </div>
+        
+        <div class="info-row rizika-box">
+            <span class="label">⚠️ Rizika:</span>
+            <span id="v-rizika" class="hodnota" style="font-weight: bold; color: #e65100;"></span>
+        </div>
+
+        <a id="v-mapa-link" href="#" target="_blank" class="btn-mapa">🗺️ Zobrazit plánek areálu</a>
+    </div>
+    
+    <div class="footer" id="status">Načítám databázi...</div>
+</div>
+
+<script src="data.js"></script>
+
+<script>
+    if (typeof firmy !== 'undefined') {
+        firmy.sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
+        document.getElementById('status').textContent = `Databáze připravena: ${firmy.length} objektů.`;
+    } else {
+        document.getElementById('status').innerHTML = '<b style="color:red">CHYBA: Data.js nenalezena!</b>';
+    }
+
+    function filtrovat() {
+        const hledej = document.getElementById('hledat').value.toLowerCase();
+        const ul = document.getElementById('seznam');
+        const karta = document.getElementById('vypis');
+        ul.innerHTML = '';
+        if (hledej.length < 1) { ul.style.display = 'none'; karta.style.display = 'none'; return; }
+        const vysledek = firmy.filter(f => f.nazev.toLowerCase().includes(hledej));
+        if (vysledek.length > 0) {
+            ul.style.display = 'block';
+            vysledek.slice(0, 15).forEach(f => {
+                const li = document.createElement('li');
+                li.textContent = f.nazev;
+                li.onclick = () => zobraz(f);
+                ul.appendChild(li);
+            });
+        } else { ul.style.display = 'none'; }
+    }
+
+    function zobraz(f) {
+        document.getElementById('seznam').style.display = 'none';
+        document.getElementById('vypis').style.display = 'block';
+        document.getElementById('hledat').value = f.nazev;
+        
+        document.getElementById('v-nazev').textContent = f.nazev;
+        document.getElementById('v-adresa').textContent = f.adresa || "-";
+        document.getElementById('v-kontakt').textContent = f.kontakt || "Neuvedeno";
+        document.getElementById('v-zamestnanci').textContent = f.zamestnanci || "-";
+        document.getElementById('v-doba').textContent = f.doba || "-";
+        document.getElementById('v-rizika').innerHTML = f.rizika || "Bez identifikovaných rizik";
+
+        // Práce s mapou
+        const btnMapa = document.getElementById('v-mapa-link');
+        if (f.mapa && f.mapa.trim() !== "") {
+            btnMapa.href = "mapy/" + f.mapa; // Cesta do podsložky mapy
+            btnMapa.style.display = "block";
+        } else {
+            btnMapa.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>

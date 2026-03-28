@@ -1,0 +1,29 @@
+    {
+        nazev: "", 
+        adresa: "", 
+        okres: "",
+        kontakt: "", 
+        zamestnanci: "", 
+        doba: "", 
+        charakter: "",
+        trasa: "",
+        rizika: "",
+        mapa: ""
+    },
+
+
+
+VÍC OBRÁZKŮ/SCHÉMAT:
+
+    {
+        nazev: "", 
+        adresa: "", 
+        okres: "",
+        kontakt: "", 
+        zamestnanci: "", 
+        doba: "", 
+        charakter: "",
+        trasa: "",
+        rizika: "",
+        mapa: ["", ""]
+    },
