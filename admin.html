@@ -150,6 +150,11 @@ svg { display: block; }
 .steps li { margin: 3px 0; }
 .ver { display: flex; gap: 10px; align-items: baseline; margin: 6px 0 12px; }
 .ver b { font-family: var(--font-d); font-size: 32px; }
+.pub-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.pub-note { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-3); line-height: 1.5; }
+.pub-note b { color: var(--ink-2); }
+.gh-in { flex: 1; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
 .log { max-height: 320px; overflow: auto; font-size: 13.5px; }
 .log div { padding: 6px 0; border-top: 1px solid var(--line); } .log div:first-child { border-top: 0; }
 .log .c { color: var(--ink-3); font-size: 12px; }
@@ -256,7 +261,7 @@ let S = [];   // seznam správců (sdílený přes data.js)
 // ověření: { kdo, datum (RRRR-MM-DD), pozn } – starší data měla jen text
 const ov = (o) => (o && typeof o === 'object') ? { kdo: o.kdo || '', datum: o.datum || '', pozn: o.pozn || '' } : { kdo: '', datum: '', pozn: String(o || '') };
 const normF = (f) => JSON.stringify(pub({ ...f, latky: f.latky || [], overeno: ov(f.overeno) }));
-let F = [], C = [], base = FILE_META.verze || 0, exported = false;
+let F = [], C = [], base = FILE_META.verze || 0, exported = false, via = '';   // via: 'gh' = odesláno na GitHub, '' = stažené soubory
 function prep() {
   F.forEach((f) => { f._id = f._id || uid(); f.latky = f.latky || []; f.overeno = ov(f.overeno); });
   C.forEach((l) => { l._id = l._id || uid(); l.piktogramy = [...new Set((l.piktogramy || []).map((p) => PIK_OLD[p] || p))]; if (!l.id) l.id = slug(l.nazev); });
@@ -264,8 +269,8 @@ function prep() {
 function fromFiles() { F = clone(FILE_F); C = clone(FILE_C); S = clone(FILE_S); base = FILE_META.verze || 0; exported = false; prep(); }
 function slug(s) { let b = norm(s).replace(/\(.*?\)/g, '').replace(/[^a-z0-9]+/g, '').slice(0, 14) || 'latka'; let id = b, n = 2; while (C.some((l) => l.id === id)) id = b + n++; return id; }
 let saveT = null;
-function changed() { exported = false; clearTimeout(saveT); saveT = setTimeout(saveDraft, 300); renderStatus(); }
-function saveDraft() { try { localStorage.setItem('opka_draft2', JSON.stringify({ F, C, S, base, cas: now(), exported })); } catch (e) { toast('Nepodařilo se uložit rozpracované', true); } $('saved') && ($('saved').textContent = 'Uloženo automaticky ' + new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })); }
+function changed() { exported = false; via = ''; clearTimeout(saveT); saveT = setTimeout(saveDraft, 300); renderStatus(); }
+function saveDraft() { try { localStorage.setItem('opka_draft2', JSON.stringify({ F, C, S, base, cas: now(), exported, via })); } catch (e) { toast('Nepodařilo se uložit rozpracované', true); } $('saved') && ($('saved').textContent = 'Uloženo automaticky ' + new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })); }
 function logIt(t) { try { const L = JSON.parse(localStorage.getItem('opka_log2') || '[]'); L.unshift({ t, c: now(), s: spravce() }); L.length = Math.min(L.length, 100); localStorage.setItem('opka_log2', JSON.stringify(L)); } catch (e) {} }
 const spravce = () => { try { return localStorage.getItem('opka_spravce') || ''; } catch (e) { return ''; } };
 
@@ -292,7 +297,7 @@ function problems(f) { const p = []; if (!f.nazev.trim()) p.push('název'); if (
 /* ---------- stav nahoře ---------- */
 function renderStatus() {
   const d = diff(), st = $('status');
-  if (exported) { st.className = 'status warn'; $('status-t').textContent = `Export verze ${base} čeká na nahrání`; }
+  if (exported) { st.className = 'status warn'; $('status-t').textContent = via === 'gh' ? `Verze ${base} na GitHubu` : `Verze ${base} čeká na nahrání`; }
   else if (d.n) { st.className = 'status warn'; $('status-t').textContent = `Nepublikované změny: ${d.n}`; }
   else { st.className = 'status ok'; $('status-t').textContent = `Shodné s verzí ${FILE_META.verze || 0}`; }
   $('tab-cnt').hidden = !d.n; $('tab-cnt').textContent = d.n;
@@ -337,9 +342,9 @@ function renderFEd() {
       <div class="picker"><label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lat-q" type="search" placeholder="Přidat látku z databáze – piš název nebo UN…" autocomplete="off"></label><div class="drop" id="lat-drop" hidden></div></div>
     </div>
     <div class="sec"><h3>Mapové podklady</h3>
-      <div class="maps">${m.map((x, i) => `<div class="map"><div class="img"><img src="mapy/${encodeURI(x)}" alt="" onerror="this.remove();this.parentNode.insertAdjacentHTML('beforeend','<span class=miss>Soubor není ve složce mapy/</span>')"></div><div class="bar2"><span class="n" title="${esc(x)}">${i + 1}. ${esc(x)}</span><button type="button" data-mv="${i}" data-d="-1" title="Dřív">${IC.up}</button><button type="button" data-mv="${i}" data-d="1" title="Později">${IC.down}</button><button type="button" data-rm="${i}" title="Odebrat">${IC.x}</button></div></div>`).join('')}</div>
+      <div class="maps">${m.map((x, i) => `<div class="map"><div class="img"><img src="${PEND[x] ? PEND[x].url : 'mapy/' + encodeURI(x)}" alt="" onerror="this.remove();this.parentNode.insertAdjacentHTML('beforeend','<span class=miss>Soubor není ve složce mapy/</span>')"></div><div class="bar2"><span class="n" title="${esc(x)}">${i + 1}. ${esc(x)}</span><button type="button" data-mv="${i}" data-d="-1" title="Dřív">${IC.up}</button><button type="button" data-mv="${i}" data-d="1" title="Později">${IC.down}</button><button type="button" data-rm="${i}" title="Odebrat">${IC.x}</button></div></div>`).join('')}</div>
       <div class="add-map"><label class="btn">Vybrat soubory…<input type="file" id="map-pick" accept="image/*" multiple hidden></label><input type="text" id="map-name" placeholder="nebo napiš název souboru, např. orlen.jpeg"><button type="button" class="btn" id="map-add">Přidat</button></div>
-      <p class="hint" style="font-size:12.5px;color:var(--ink-3);margin:8px 0 0">Obrázky je potřeba nahrát na server do složky <b>mapy/</b> se stejným názvem. První obrázek se v aplikaci zobrazuje jako první.</p>
+      <p class="hint" style="font-size:12.5px;color:var(--ink-3);margin:8px 0 0">Obrázky vybrané tlačítkem se při <b>Publikovat na GitHub</b> nahrají do složky <b>mapy/</b> samy (vybrané soubory si admin pamatuje jen do zavření stránky). Při ručním publikování je nahraj do <b>mapy/</b> se stejným názvem. První obrázek se v aplikaci zobrazuje jako první.</p>
     </div>
     <div class="sec"><h3>Ověření údajů</h3><div class="row">
       <div class="fld"><label for="ov-kdo">Ověřil</label><select id="ov-kdo" data-ov="kdo"><option value="">— vyber správce —</option>${S.map((n) => `<option ${f.overeno.kdo === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}${f.overeno.kdo && !S.includes(f.overeno.kdo) ? `<option selected>${esc(f.overeno.kdo)}</option>` : ''}</select></div>
@@ -371,7 +376,7 @@ $('e-obj').addEventListener('click', (e) => {
   if (e.target.closest('#ov-dnes')) { const d = new Date(), v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; f.overeno.datum = v; $('ov-dat').value = v; if (!f.overeno.kdo && spravce()) { f.overeno.kdo = spravce(); $('ov-kdo').value = spravce(); } changed(); renderFList(); return; }
   if (e.target.closest('#f-prev')) { preview(f); return; }
 });
-$('e-obj').addEventListener('change', (e) => { const t = e.target; if (t.dataset && t.dataset.ov) { const f = getF(); f.overeno[t.dataset.ov] = t.value; changed(); renderFList(); return; } if (e.target.id === 'map-pick') { const f = getF(), m = [].concat(f.mapa || []).filter(Boolean); [...e.target.files].forEach((x) => { if (!m.includes(x.name)) m.push(x.name); }); setMaps(f, m); toast('Přidáno – nezapomeň soubory nahrát do složky mapy/'); } });
+$('e-obj').addEventListener('change', (e) => { const t = e.target; if (t.dataset && t.dataset.ov) { const f = getF(); f.overeno[t.dataset.ov] = t.value; changed(); renderFList(); return; } if (e.target.id === 'map-pick') { const f = getF(), m = [].concat(f.mapa || []).filter(Boolean); [...e.target.files].forEach((x) => { if (PEND[x.name]) URL.revokeObjectURL(PEND[x.name].url); PEND[x.name] = { file: x, url: URL.createObjectURL(x) }; if (!m.includes(x.name)) m.push(x.name); }); setMaps(f, m); toast(ghReady() ? 'Přidáno – obrázky se nahrají při publikování na GitHub' : 'Přidáno – nezapomeň soubory nahrát do složky mapy/'); } });
 $('e-obj').addEventListener('keydown', (e) => { if (e.target.id === 'map-name' && e.key === 'Enter') { e.preventDefault(); $('map-add').click(); } if (e.target.id === 'lat-q' && e.key === 'Enter') { e.preventDefault(); const b = document.querySelector('#lat-drop [data-addlat]'); if (b) b.click(); } });
 document.addEventListener('click', (e) => { if (!e.target.closest('.picker')) { const d = $('lat-drop'); if (d) d.hidden = true; } });
 function setMaps(f, m) { f.mapa = m.length === 0 ? '' : m.length === 1 ? m[0] : m; changed(); renderFList(); renderFEd(); }
@@ -455,45 +460,230 @@ function renderPub() {
     <div class="sec"><h3>Publikovat</h3>
       ${probs.length ? `<p style="margin:0 0 6px;font-weight:650;color:var(--err)">Nejdřív oprav:</p><ul class="steps prob">${probs.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
       <p style="margin:6px 0 0">Publikuje: ${spravce() ? `<b>${esc(spravce())}</b>` : '<b style="color:var(--err)">nevybráno – vyber správce nahoře</b>'}</p>
-      <div class="ver"><span style="color:var(--ink-2)">Nová verze dat:</span><b>${base + 1}</b></div>
-      <button type="button" class="btn brand" id="export" ${probs.length ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}>Stáhnout data.js + cbrne.js</button>
-      <ol class="steps"><li>Stáhni oba soubory.</li><li>Nahraj je na server do složky aplikace (přepiš původní).</li><li>Nové obrázky plánků nahraj do složky <b>mapy/</b>.</li><li>Otevři aplikaci a v patičce zkontroluj číslo verze.</li></ol></div>
+      <div class="ver"><span style="color:var(--ink-2)">${exported ? 'Publikovaná verze:' : 'Nová verze dat:'}</span><b>${exported ? base : base + 1}</b></div>
+      <div class="pub-btns">
+        <button type="button" class="btn brand" id="gh-pub" ${probs.length || !ghReady() || exported ? 'disabled' : ''}>${IC_UP}${exported && via === 'gh' ? `Verze ${base} publikována` : 'Publikovat na GitHub'}</button>
+        <button type="button" class="btn" id="export" ${probs.length || exported ? 'disabled' : ''}>${IC_DL}Stáhnout soubory</button>
+      </div>
+      <p class="pub-note">${ghReady() ? `Zapíše <b>data.js</b>, <b>cbrne.js</b> a nově vybrané obrázky do <b>${esc(ghWhere())}</b>. GitHub Pages změny nasadí obvykle do 1–3 minut.` : vault.locked ? 'Pro publikování na GitHub odemkni připojení níže.' : 'Pro publikování na GitHub vyplň připojení níže. Bez něj stáhni soubory a nahraj je ručně (přepiš původní data.js a cbrne.js, nové obrázky do složky <b>mapy/</b>).'}</p></div>
     <div class="sec"><h3>Seznam správců</h3><p style="margin:0 0 10px;color:var(--ink-2);font-size:14px">Sdílí se s daty – po publikování ho uvidí všichni správci.</p>
       <ul class="sprl">${S.map((n) => `<li><span>${esc(n)}</span><button type="button" class="btn sm danger" data-rmspr="${esc(n)}">Odebrat</button></li>`).join('') || '<li style="color:var(--ink-3)">Zatím nikdo.</li>'}</ul>
       <div class="date-row"><input id="spr-new" type="text" placeholder="jméno a příjmení" style="height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)"><button type="button" class="btn" id="spr-add">Přidat</button></div></div>
     <div class="sec"><h3>Načíst data</h3><p style="margin:0 0 10px;color:var(--ink-2);font-size:14px">Načte <b>data.js</b> a/nebo <b>cbrne.js</b> (např. od jiného správce) do editoru jako rozpracované změny.</p><label class="btn">Vybrat soubory…<input type="file" id="imp" accept=".js" multiple hidden></label></div>
+    ${ghSection()}
     <div class="sec"><h3>Historie úprav (tento počítač)</h3><div class="log">${log.map((x) => `<div>${esc(x.t)}<br><span class="c">${esc(x.c)}${x.s ? ' · ' + esc(x.s) : ''}</span></div>`).join('') || '<span style="color:var(--ink-3)">Zatím nic.</span>'}</div></div>`;
 }
 $('pub').addEventListener('keydown', (e) => { if (e.target.id === 'spr-new' && e.key === 'Enter') { e.preventDefault(); $('spr-add').click(); } });
 $('pub').addEventListener('click', (e) => {
   if (e.target.closest('#discard')) { if (!confirm('Zahodit všechny nepublikované změny a vrátit se k souborům?')) return; localStorage.removeItem('opka_draft2'); fromFiles(); curF = curC = null; logIt('Zahozeny změny'); renderAll(); renderPub(); $('notice').hidden = true; return; }
   if (e.target.closest('#export')) exportFiles();
+  if (e.target.closest('#gh-pub')) ghPublish();
+  if (ghClick(e)) return;
   if (e.target.closest('#spr-add')) { const v = $('spr-new').value.trim(); if (!v) return; if (S.includes(v)) { toast('Už je v seznamu', true); return; } S.push(v); S.sort((a, b) => a.localeCompare(b, 'cs')); logIt('Přidán správce: ' + v); changed(); renderWho(); renderPub(); return; }
   const r = e.target.closest('[data-rmspr]'); if (r) { const v = r.dataset.rmspr; if (!confirm(`Odebrat „${v}“ ze seznamu správců?`)) return; S = S.filter((x) => x !== v); logIt('Odebrán správce: ' + v); changed(); renderWho(); renderPub(); }
 });
 $('pub').addEventListener('change', (e) => { if (e.target.id === 'imp') importFiles(e.target.files); });
+$('pub').addEventListener('input', (e) => { const k = e.target.dataset && e.target.dataset.gh; if (!k || vault.locked) return; gh[k] = e.target.value.trim(); clearTimeout(sealT); sealT = setTimeout(sealVault, 300); });
 function dl(name, txt) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/javascript' })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function buildFiles(meta) {
+  const head = (w) => `// OPKA – ${w}. Verze ${meta.verze}, ${meta.datum}, ${meta.spravce}\n`;
+  return {
+    data: head('data') + 'const OPKA_META = ' + JSON.stringify(meta, null, 4) + ';\nconst OPKA_SPRAVCI = ' + JSON.stringify(S, null, 4) + ';\nconst firmy = ' + JSON.stringify(F.map(pub), null, 4) + ';\n',
+    cbrne: head('CBRNE') + 'const cbrneData = ' + JSON.stringify(C.map(pub), null, 4) + ';\n',
+  };
+}
 function exportFiles() {
   const s = spravce(); if (!s) { toast('Nahoře vyber, kdo publikuje', true); $('who').focus(); return; }
-  const meta = { verze: base + 1, datum: now(), spravce: s };
-  const head = (w) => `// OPKA – ${w}. Verze ${meta.verze}, ${meta.datum}, ${meta.spravce}\n`;
-  const fOut = F.map(pub), cOut = C.map(pub);
-  dl('data.js', head('data') + 'const OPKA_META = ' + JSON.stringify(meta, null, 4) + ';\nconst OPKA_SPRAVCI = ' + JSON.stringify(S, null, 4) + ';\nconst firmy = ' + JSON.stringify(fOut, null, 4) + ';\n');
-  setTimeout(() => dl('cbrne.js', head('CBRNE') + 'const cbrneData = ' + JSON.stringify(cOut, null, 4) + ';\n'), 400);
-  base = meta.verze; exported = true; saveDraft(); logIt(`Export verze ${meta.verze}`); renderStatus(); renderPub();
+  const meta = { verze: base + 1, datum: now(), spravce: s }, out = buildFiles(meta);
+  dl('data.js', out.data);
+  setTimeout(() => dl('cbrne.js', out.cbrne), 400);
+  base = meta.verze; exported = true; via = ''; saveDraft(); logIt(`Export verze ${meta.verze}`); renderStatus(); renderPub();
   toast(`Verze ${meta.verze} stažena – nahraj soubory na server`);
+}
+function loadText(txt) {
+  const g = {}; new Function('g', String(txt).replace(/^const (OPKA_META|OPKA_SPRAVCI|firmy|cbrneData)\b/gm, 'g.$1'))(g);
+  if (g.firmy) { F = clone(g.firmy); if (g.OPKA_META) base = g.OPKA_META.verze || base; if (g.OPKA_SPRAVCI) S = clone(g.OPKA_SPRAVCI); }
+  if (g.cbrneData) C = clone(g.cbrneData);
+  if (!g.firmy && !g.cbrneData) throw new Error('soubor neobsahuje data');
+  return g;
 }
 function importFiles(files) {
   [...files].forEach((file) => { const r = new FileReader(); r.onload = () => {
-    try {
-      const g = {}; new Function('g', String(r.result).replace(/^const (OPKA_META|OPKA_SPRAVCI|firmy|cbrneData)\b/gm, 'g.$1'))(g);
-      if (g.firmy) { F = clone(g.firmy); if (g.OPKA_META) base = g.OPKA_META.verze || base; if (g.OPKA_SPRAVCI) S = clone(g.OPKA_SPRAVCI); }
-      if (g.cbrneData) C = clone(g.cbrneData);
-      if (!g.firmy && !g.cbrneData) throw new Error('soubor neobsahuje data');
-      prep(); curF = curC = null; changed(); renderAll(); renderPub(); logIt('Načten soubor ' + file.name); toast('Načteno: ' + file.name);
-    } catch (er) { toast('Chyba souboru ' + file.name + ': ' + er.message, true); }
+    try { loadText(r.result); prep(); curF = curC = null; changed(); renderAll(); renderPub(); logIt('Načten soubor ' + file.name); toast('Načteno: ' + file.name); }
+    catch (er) { toast('Chyba souboru ' + file.name + ': ' + er.message, true); }
   }; r.readAsText(file, 'utf-8'); });
 }
+
+/* ---------- GitHub (převzato z ResqHubu) ----------
+   Připojení (uživatel, repozitář, větev, složka, token) je v tomto počítači uložené
+   zašifrované heslem. Klíč existuje jen v paměti, dokud je připojení odemčené. */
+const VAULT_KEY = 'opka_ghvault';
+const EMPTY_GH = { owner: '', repo: '', branch: 'main', folder: '', token: '' };
+let gh = { ...EMPTY_GH }, sealT = null;
+const vault = { key: null, salt: null, get locked() { return !this.key && !!storedVault(); } };
+const PEND = {};   // obrázky vybrané v tomto sezení: název → { file, url }
+const IC_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>';
+const IC_DL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>';
+
+const u8 = (b64) => { const b = atob(b64), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+function bytesToB64(bytes) { let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); }
+const textToB64 = (str) => bytesToB64(new TextEncoder().encode(str));
+async function deriveKey(pw, salt) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 300000, hash: 'SHA-256' }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+function storedVault() { try { return JSON.parse(localStorage.getItem(VAULT_KEY)); } catch (e) { return null; } }
+async function sealVault() {
+  if (!vault.key) return;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, vault.key, new TextEncoder().encode(JSON.stringify(gh))));
+  try { localStorage.setItem(VAULT_KEY, JSON.stringify({ v: 1, salt: bytesToB64(vault.salt), iv: bytesToB64(iv), data: bytesToB64(data) })); } catch (e) {}
+}
+function ghAutofill() {   // na GitHub Pages se uživatel, repozitář a složka doplní sami
+  const host = location.hostname.match(/^([^.]+)\.github\.io$/i);
+  if (!host || gh.owner) return;
+  const seg = location.pathname.split('/').filter(Boolean);
+  if (seg.length && /\.html?$/i.test(seg[seg.length - 1])) seg.pop();
+  gh.owner = host[1];
+  if (seg.length && host[1].toLowerCase() + '.github.io' !== seg[0].toLowerCase()) { gh.repo = seg.shift(); } else gh.repo = host[1] + '.github.io';
+  if (!gh.folder) gh.folder = seg.join('/');
+}
+const ghReady = () => !!(vault.key && gh.owner && gh.repo && gh.token);
+const ghWhere = () => `${gh.owner}/${gh.repo}` + (gh.folder ? '/' + gh.folder.replace(/^\/+|\/+$/g, '') : '') + ` (${gh.branch || 'main'})`;
+const ghHeaders = (raw) => ({ Authorization: 'Bearer ' + gh.token, Accept: raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' });
+function ghUrl(p) {
+  const full = [gh.folder, p].map((s) => (s || '').replace(/^\/+|\/+$/g, '')).filter(Boolean).join('/');
+  return 'https://api.github.com/repos/' + encodeURIComponent(gh.owner) + '/' + encodeURIComponent(gh.repo) + '/contents/' + full.split('/').map(encodeURIComponent).join('/');
+}
+function ghError(st) {
+  if (st === 401) return 'Neplatný nebo prošlý token.';
+  if (st === 403) return 'Token nemá oprávnění zapisovat (Contents: Read and write).';
+  if (st === 404) return 'Repozitář, větev nebo složka nenalezena – zkontroluj údaje a přístup tokenu.';
+  if (st === 409 || st === 422) return 'Konflikt na GitHubu, zkus to prosím znovu.';
+  return 'Chyba GitHubu (' + st + ').';
+}
+const ref = () => '?ref=' + encodeURIComponent(gh.branch || 'main');
+async function ghGetText(p) {   // obsah souboru, nebo null když neexistuje
+  const r = await fetch(ghUrl(p) + ref(), { headers: ghHeaders(true), cache: 'no-store' });
+  if (r.status === 404) return null; if (!r.ok) throw new Error(ghError(r.status));
+  return r.text();
+}
+async function ghList(dir) {
+  const r = await fetch(ghUrl(dir) + ref(), { headers: ghHeaders(), cache: 'no-store' });
+  if (r.status === 404) return new Set(); if (!r.ok) throw new Error(ghError(r.status));
+  const j = await r.json(); return new Set(Array.isArray(j) ? j.map((x) => x.name) : []);
+}
+async function ghPut(p, b64, message) {
+  const branch = gh.branch || 'main'; let sha;
+  const g = await fetch(ghUrl(p) + ref(), { headers: ghHeaders(), cache: 'no-store' });
+  if (g.ok) sha = (await g.json()).sha; else if (g.status !== 404) throw new Error(ghError(g.status));
+  const body = { message, content: b64, branch }; if (sha) body.sha = sha;
+  const r = await fetch(ghUrl(p), { method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body) });
+  if (!r.ok) throw new Error(ghError(r.status));
+}
+function metaOf(txt) { try { const g = {}; new Function('g', String(txt).replace(/^const (OPKA_META|OPKA_SPRAVCI|firmy|cbrneData)\b/gm, 'g.$1'))(g); return g.OPKA_META || { verze: 0 }; } catch (e) { return { verze: 0 }; } }
+
+function ghSection() {
+  const f = (k, l, ph, extra = '') => `<div class="fld"><label for="gh-${k}">${l}</label><input id="gh-${k}" data-gh="${k}" value="${esc(gh[k] || '')}" placeholder="${ph}" autocapitalize="off" autocorrect="off" spellcheck="false" ${extra}></div>`;
+  const fields = `<div class="row">${f('owner', 'Uživatel', 'github-jmeno')}${f('repo', 'Repozitář', 'opka')}</div>
+    <div class="row">${f('branch', 'Větev', 'main')}${f('folder', 'Složka', 'kořen repozitáře')}</div>
+    <div class="row">${f('token', 'Token', 'github_pat_…', 'type="password" autocomplete="off"').replace('class="fld"', 'class="fld wide"')}</div>`;
+  const help = '<p class="pub-note">Token vytvoříš na GitHubu v <b>Settings › Developer settings › Fine-grained tokens</b>. Povol jen tento repozitář a oprávnění <b>Contents: Read and write</b>. Připojení zůstává uložené jen v tomto počítači, zašifrované heslem.</p>';
+  if (vault.locked) return `<div class="sec"><h3>Připojení ke GitHubu <span class="flag mod">zamčeno</span></h3>
+    <p style="margin:0 0 10px;color:var(--ink-2);font-size:14px">Připojení je v tomto počítači uložené. Odemkni ho heslem.</p>
+    <div class="date-row"><input id="gh-pw" type="password" placeholder="heslo k připojení" autocomplete="current-password" class="gh-in"><button type="button" class="btn pri" id="gh-unlock">Odemknout</button></div>
+    <button type="button" class="btn sm danger" id="gh-forget" style="margin-top:12px">Zapomenout připojení</button></div>`;
+  if (!vault.key) return `<div class="sec"><h3>Připojení ke GitHubu</h3>${fields}
+    <div class="row"><div class="fld"><label for="gh-pw">Heslo k připojení</label><input id="gh-pw" type="password" autocomplete="new-password" placeholder="aspoň 8 znaků"></div><div class="fld"><label for="gh-pw2">Heslo znovu</label><input id="gh-pw2" type="password" autocomplete="new-password"></div></div>
+    <div class="pub-btns"><button type="button" class="btn pri" id="gh-save">Uložit a ověřit</button></div>${help}</div>`;
+  return `<div class="sec"><h3>Připojení ke GitHubu <span class="flag new">odemčeno</span></h3>${fields}
+    <div class="pub-btns"><button type="button" class="btn" id="gh-test">Ověřit připojení</button><button type="button" class="btn" id="gh-load">Načíst data z GitHubu</button><button type="button" class="btn" id="gh-lock">Zamknout</button></div>${help}</div>`;
+}
+
+async function ghTest(quiet) {
+  if (!(gh.owner && gh.repo && gh.token)) { toast('Vyplň uživatele, repozitář a token', true); return false; }
+  try {
+    const r = await fetch('https://api.github.com/repos/' + encodeURIComponent(gh.owner) + '/' + encodeURIComponent(gh.repo), { headers: ghHeaders(), cache: 'no-store' });
+    if (!r.ok) throw new Error(ghError(r.status));
+    const j = await r.json();
+    if (j.permissions && !j.permissions.push) throw new Error('Token má jen čtení, chybí zápis.');
+    const d = await ghGetText('data.js');
+    if (!quiet) toast(`Připojeno k ${j.full_name} ✓` + (d === null ? ' – data.js ve složce zatím není' : ` – na GitHubu je verze ${metaOf(d).verze}`), d === null);
+    return true;
+  } catch (e) { toast(e.message || 'Nepodařilo se připojit', true); return false; }
+}
+
+async function ghLoad(ask = true) {
+  if (ask && diff().n && !confirm('Načíst data z GitHubu do editoru?\n\nTvoje nepublikované změny se nejdřív stáhnou jako záloha (soubory …-zaloha.js) a pak se nahradí verzí z GitHubu.')) return;
+  try {
+    const [d, c] = await Promise.all([ghGetText('data.js'), ghGetText('cbrne.js')]);
+    if (d === null && c === null) { toast('Na GitHubu zatím žádná data nejsou', true); return; }
+    if (diff().n) { const o = buildFiles({ verze: base, datum: now(), spravce: spravce() + ' (záloha)' }); dl('data-zaloha.js', o.data); setTimeout(() => dl('cbrne-zaloha.js', o.cbrne), 400); }
+    if (d !== null) loadText(d); if (c !== null) loadText(c);
+    prep(); curF = curC = null; changed(); renderAll(); renderPub();
+    logIt(`Načtena verze ${base} z GitHubu`); toast(`Načtena verze ${base} z GitHubu`);
+  } catch (e) { toast(e.message || 'Načtení selhalo', true); }
+}
+
+async function ghPublish() {
+  const sp = spravce(); if (!sp) { toast('Nahoře vyber, kdo publikuje', true); $('who').focus(); return; }
+  if (!ghReady()) return;
+  const btn = $('gh-pub'), lab = (t) => { btn.innerHTML = IC_UP + esc(t); };
+  btn.disabled = true; $('export').disabled = true;
+  try {
+    lab('Kontroluji verzi na GitHubu…');
+    const remote = await ghGetText('data.js'), rm = remote === null ? { verze: 0 } : metaOf(remote);
+    if ((rm.verze || 0) > base) {
+      if (confirm(`Na GitHubu je už novější verze ${rm.verze}` + (rm.spravce ? ` (${rm.spravce}, ${rm.datum || ''})` : '') + `.\nTvoje změny vycházejí z verze ${base} – publikováním bys jeho změny přepsal.\n\nOK = stáhnout tvoje změny jako zálohu a načíst verzi ${rm.verze} z GitHubu. Pak změny zopakuj.\nZrušit = nic nedělat.`)) await ghLoad(false);
+      return;
+    }
+    lab('Kontroluji obrázky…');
+    const refs = [...new Set(F.flatMap((f) => [].concat(f.mapa || []).filter(Boolean)))];
+    const have = refs.length ? await ghList('mapy') : new Set();
+    const missing = refs.filter((n) => !have.has(n)), up = missing.filter((n) => PEND[n]), lost = missing.filter((n) => !PEND[n]);
+    if (lost.length && !confirm(`Tyto obrázky nejsou na GitHubu ve složce mapy/ a v tomto počítači nejsou vybrané:\n\n• ${lost.join('\n• ')}\n\nV aplikaci se nezobrazí. Publikovat i tak?\n(Obrázek přidáš znovu přes „Vybrat soubory…“ u objektu.)`)) return;
+    const meta = { verze: base + 1, datum: now(), spravce: sp }, out = buildFiles(meta), total = up.length + 2; let i = 0;
+    for (const n of up) { lab(`Nahrávám ${++i}/${total} – ${n}`); await ghPut('mapy/' + n, bytesToB64(new Uint8Array(await PEND[n].file.arrayBuffer())), `OPKA: plánek ${n} (${sp})`); }
+    lab(`Nahrávám ${++i}/${total} – cbrne.js`); await ghPut('cbrne.js', textToB64(out.cbrne), `OPKA data v${meta.verze} – CBRNE (${sp})`);
+    lab(`Nahrávám ${++i}/${total} – data.js`); await ghPut('data.js', textToB64(out.data), `OPKA data v${meta.verze} (${sp})`);
+    base = meta.verze; exported = true; via = 'gh'; saveDraft();
+    logIt(`Publikováno na GitHub: verze ${meta.verze}` + (up.length ? `, obrázky: ${up.join(', ')}` : ''));
+    renderStatus(); toast(`Verze ${meta.verze} publikována ✓ GitHub Pages ji nasadí do pár minut`);
+  } catch (e) { toast(e.message || 'Publikování selhalo', true); }
+  finally { renderPub(); }
+}
+
+function ghClick(e) {
+  const t = e.target;
+  if (t.closest('#gh-save')) {
+    (async () => {
+      const pw = $('gh-pw').value;
+      if (!window.crypto || !crypto.subtle) return toast('Šifrování potřebuje zabezpečenou adresu (https)', true);
+      if (pw.length < 8) return toast('Heslo musí mít aspoň 8 znaků', true);
+      if (pw !== $('gh-pw2').value) return toast('Hesla se neshodují', true);
+      vault.salt = crypto.getRandomValues(new Uint8Array(16)); vault.key = await deriveKey(pw, vault.salt);
+      await sealVault(); renderPub(); ghTest();
+    })(); return true;
+  }
+  if (t.closest('#gh-unlock')) {
+    (async () => {
+      const st = storedVault(), b = $('gh-unlock'); b.disabled = true; b.textContent = 'Odemykám…';
+      try {
+        const salt = u8(st.salt), key = await deriveKey($('gh-pw').value, salt);
+        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u8(st.iv) }, key, u8(st.data));
+        gh = { ...EMPTY_GH, ...JSON.parse(new TextDecoder().decode(plain)) }; vault.key = key; vault.salt = salt;
+        renderPub(); toast('Připojení odemčeno');
+      } catch (er) { b.disabled = false; b.textContent = 'Odemknout'; toast('Špatné heslo', true); $('gh-pw').select(); }
+    })(); return true;
+  }
+  if (t.closest('#gh-forget')) { if (!confirm('Smazat uložené připojení ke GitHubu včetně tokenu z tohoto počítače? Data ani koncept se nezmění.')) return true; try { localStorage.removeItem(VAULT_KEY); } catch (er) {} gh = { ...EMPTY_GH }; ghAutofill(); renderPub(); return true; }
+  if (t.closest('#gh-lock')) { clearTimeout(sealT); sealVault().then(() => { vault.key = null; vault.salt = null; gh = { ...EMPTY_GH }; renderPub(); }); return true; }
+  if (t.closest('#gh-test')) { ghTest(); return true; }
+  if (t.closest('#gh-load')) { ghLoad(); return true; }
+  return false;
+}
+$('pub').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'gh-pw') { e.preventDefault(); ($('gh-unlock') || $('gh-save')).click(); } });
+ghAutofill();
 
 /* ---------- ostatní ---------- */
 let toastT = null;
@@ -513,10 +703,11 @@ function renderAll() { renderWho(); renderFList(); renderFEd(); renderCList(); r
   let d = null; try { d = JSON.parse(localStorage.getItem('opka_draft2') || 'null'); } catch (e) {}
   if (d && d.exported && (FILE_META.verze || 0) >= d.base) { localStorage.removeItem('opka_draft2'); d = null; }   // export už je na serveru
   if (d) {
-    F = d.F; C = d.C; S = d.S || clone(FILE_S); base = d.base; exported = !!d.exported; prep();
+    F = d.F; C = d.C; S = d.S || clone(FILE_S); base = d.base; exported = !!d.exported; via = d.via || ''; prep();
     const n = $('notice');
-    if (!d.exported && (FILE_META.verze || 0) > d.base) { n.className = 'notice err'; n.innerHTML = `<b>Pozor:</b> rozpracované změny z ${esc(d.cas)} vychází z verze ${d.base}, ale na serveru je už verze ${FILE_META.verze}. Při publikování bys přepsal novější data. <button type="button" class="btn sm" id="n-discard">Zahodit a načíst verzi ${FILE_META.verze}</button>`; }
-    else if (d.exported) { n.className = 'notice warn'; n.innerHTML = `<b>Export verze ${d.base} ještě není na serveru</b> (soubory mají verzi ${FILE_META.verze || 0}). Nahraj stažené soubory.`; }
+    if (!d.exported && (FILE_META.verze || 0) > d.base) { n.className = 'notice err'; n.innerHTML = `<span><b>Pozor:</b> rozpracované změny z ${esc(d.cas)} vychází z verze ${d.base}, ale na serveru je už verze ${FILE_META.verze}. Při publikování bys přepsal novější data.</span> <button type="button" class="btn sm" id="n-discard">Zahodit a načíst verzi ${FILE_META.verze}</button>`; }
+    else if (d.exported && d.via === 'gh') { n.className = 'notice warn'; n.innerHTML = `<span><b>Verze ${d.base} je odeslaná na GitHub</b>, ale stránka ještě načítá verzi ${FILE_META.verze || 0}. Nasazení trvá 1–3 minuty, pak obnov stránku.</span>`; }
+    else if (d.exported) { n.className = 'notice warn'; n.innerHTML = `<span><b>Export verze ${d.base} ještě není na serveru</b> (soubory mají verzi ${FILE_META.verze || 0}). Nahraj stažené soubory.</span>`; }
     else { n.className = 'notice warn'; n.innerHTML = `Pokračuješ v rozpracovaných změnách z ${esc(d.cas)}. <button type="button" class="btn sm" id="n-discard">Zahodit a začít ze souborů</button>`; }
     n.hidden = false;
   } else fromFiles();
