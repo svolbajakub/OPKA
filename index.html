@@ -1,313 +1,465 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Karty ZZS">
-    
-    <title>OPERATIVNÍ KARTY - ZZS ÚK</title>
-    
-    <style>
-        :root {
-            --bg-color: #f0f2f5; --card-bg: #ffffff; --text-main: #111111;
-            --text-sub: #444444; --accent: #d32f2f; --row-bg: #f9f9f9;
-            --border: #cfd8dc; --rizika-bg: #fff3e0; --rizika-border: #ff9800;
-            --route-bg: #e3f2fd; --route-border: #1565c0; --char-bg: #eceff1;
-            --char-border: #607d8b;
-            /* CBRNE barvy z Kódu 1 */
-            --cbrne-vlastnosti-bg: #fff0e6; --cbrne-vlastnosti-border: #ff9d66;
-            --cbrne-oopp-bg: #e1f5fe; --cbrne-oopp-border: #03a9f4;
-            --cbrne-klinika-bg: #e8eaf6; --cbrne-klinika-border: #3f51b5;
-            --cbrne-pomoc-bg: #e8f5e9; --cbrne-pomoc-border: #4caf50;
-            --cave-bg: #fff9c4; --cave-border: #fbc02d;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Operativní karty">
+<title>Operativní karty – ZZS ÚK</title>
+<link rel="icon" href="OPKA_icon.ico">
+<script>try { const t = localStorage.getItem('opka_theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<style>
+:root {
+  --bg: #EEF0F3; --surface: #FFFFFF; --surface-2: #F6F7F9; --ink: #121821; --ink-2: #4A5565; --ink-3: #8A94A3;
+  --line: #DCE0E6; --brand: #C62828; --brand-ink: #FFFFFF; --focus: #1F5FBF;
+  --risk: #B54708; --risk-bg: #FFF4E5; --risk-line: #F59E0B;
+  --route: #1F5FBF; --route-bg: #EAF2FF;
+  --c: #C62828; --b: #2E7D32; --r: #D97706; --n: #3949AB; --e: #880E4F;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 16px -6px rgba(16, 24, 40, .12);
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-d: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0E1217; --surface: #171C23; --surface-2: #1E242D; --ink: #E8ECF1; --ink-2: #A9B3C1; --ink-3: #6E7887;
+  --line: #2A323D; --brand: #E5484D; --focus: #6EA8FE;
+  --risk: #FFB648; --risk-bg: #2A1F0E; --risk-line: #B7791F;
+  --route: #7DB3FF; --route-bg: #13233A;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { touch-action: manipulation; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body { font-family: var(--font); font-size: 16.5px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 10px; }
+svg { display: block; }
 
-        body.dark-mode {
-            --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #eeeeee;
-            --text-sub: #bbbbbb; --accent: #ff5252; --row-bg: #2c2c2c;
-            --border: #444444; --rizika-bg: #332715; --rizika-border: #e65100;
-            --char-bg: #263238; --char-border: #90a4ae;
-            --cbrne-vlastnosti-bg: #3d2616; --cbrne-vlastnosti-border: #854d2e;
-            --cbrne-oopp-bg: #102a43; --cbrne-oopp-border: #243b53;
-            --cbrne-klinika-bg: #1a1c2c; --cbrne-klinika-border: #303651;
-            --cbrne-pomoc-bg: #1b2e1c; --cbrne-pomoc-border: #2d4a2f;
-            --cave-bg: #3d3600; --cave-border: #9e8600;
-        }
+/* lišta */
+.top { position: sticky; top: 0; z-index: 30; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top::before { content: ""; display: block; height: 4px; background: var(--brand); }
+.bar { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; padding: 10px 18px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo { width: 40px; height: 40px; border-radius: 11px; background: var(--brand); color: #fff; display: grid; place-items: center; flex: none; }
+.logo svg { width: 24px; height: 24px; }
+.brand h1 { margin: 0; font-family: var(--font-d); font-size: 20px; font-weight: 750; letter-spacing: -.01em; line-height: 1.1; white-space: nowrap; }
+.brand small { display: block; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); margin-left: auto; }
+.tabs button { height: 42px; padding: 0 18px; border-radius: 11px; font-weight: 650; font-size: 15.5px; color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.tabs button svg { width: 18px; height: 18px; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.icon-btn { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--ink-2); border: 1px solid var(--line); background: var(--surface); flex: none; }
+.icon-btn svg { width: 20px; height: 20px; }
+@media (max-width: 760px) {
+  .bar { flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
+  .brand h1 { font-size: 17px; } .brand small { font-size: 12px; }
+  .tabs { order: 3; width: 100%; margin: 0; } .tabs button { flex: 1; justify-content: center; padding: 0 8px; }
+  .acts { margin-left: auto; }
+}
+.acts { display: flex; gap: 8px; }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 10px; transition: 0.3s; overflow-x: hidden; }
-        
-        .methane-sidebar { position: fixed; left: 0; top: 100px; z-index: 10000; display: flex; align-items: flex-start; }
-        .methane-tab { 
-            background: #d32f2f; color: white; padding: 25px 14px; 
-            writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); 
-            border: 2px solid #ffeb3b; cursor: pointer; font-weight: bold; letter-spacing: 3px; 
-            position: relative; z-index: 10001; box-shadow: 2px 0 8px rgba(0,0,0,0.3);
-        }
-        .methane-drawer { 
-            display: none; background: var(--card-bg); border: 3px solid #d32f2f; 
-            width: 380px; max-height: calc(100vh - 120px); overflow-y: auto; 
-            flex-direction: column; padding: 25px; margin-left: -3px; 
-            position: relative; z-index: 10000; box-shadow: 10px 0 30px rgba(0,0,0,0.4); 
-        }
-        .methane-sidebar.active .methane-drawer { display: flex; animation: slideIn 0.2s ease-out; }
-        @keyframes slideIn { from { width: 0; opacity: 0; } to { width: 380px; opacity: 1; } }
+main { max-width: 1400px; margin: 0 auto; padding: 16px 18px 40px; }
+.view { display: none; } .view.on { display: block; }
 
-        .m-item { margin-bottom: 12px; display: flex; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .m-letter { color: #d32f2f; font-weight: bold; font-size: 1.6em; min-width: 35px; }
-        .m-text { font-size: 0.95em; line-height: 1.2; }
-        .m-text b { display: block; color: var(--text-main); font-size: 0.8em; opacity: 0.7; }
+/* objekty – dvousloupcové na tabletu */
+.split { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1000px) { .split { grid-template-columns: 400px minmax(0, 1fr); align-items: start; } .split .list-col { position: sticky; top: 92px; max-height: calc(100vh - 108px); display: flex; flex-direction: column; } .split .list-col .list { overflow: auto; } }
+@media (max-width: 999px) { body.det .list-col { display: none; } body:not(.det) .det-col { display: none; } }
+.search { display: flex; align-items: center; gap: 10px; height: 54px; padding: 0 14px; border-radius: 14px; background: var(--surface); border: 1.5px solid var(--line); box-shadow: var(--shadow); }
+.search:focus-within { border-color: var(--focus); }
+.search svg { width: 20px; height: 20px; color: var(--ink-3); flex: none; }
+.search input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font-size: 18px; }
+.search .x { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chip { height: 36px; padding: 0 14px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); font-size: 14.5px; font-weight: 600; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.chip .n { font-size: 12.5px; opacity: .7; }
+.count { font-size: 13.5px; color: var(--ink-3); margin: 0 2px 8px; }
+.list { display: grid; gap: 8px; padding: 2px 2px 4px; grid-template-columns: minmax(0, 1fr); }
+.obj { display: flex; gap: 12px; width: 100%; text-align: left; padding: 13px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.obj:hover { border-color: var(--ink-3); }
+.obj[aria-current="true"] { border-color: var(--focus); box-shadow: 0 0 0 2px var(--focus); }
+.obj .ic { width: 42px; height: 42px; border-radius: 11px; background: var(--risk-bg); color: var(--risk); display: grid; place-items: center; flex: none; }
+.obj .ic svg { width: 22px; height: 22px; }
+.obj .t { flex: 1; min-width: 0; }
+.obj b { display: block; font-size: 16.5px; font-weight: 700; line-height: 1.25; }
+.obj .s { display: block; font-size: 14px; color: var(--ink-2); margin-top: 2px; }
+.obj .r { display: block; font-size: 13.5px; color: var(--risk); margin-top: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+mark { background: #FFE58F; color: #121821; border-radius: 3px; padding: 0 1px; }
+.empty { padding: 28px 16px; text-align: center; color: var(--ink-3); background: var(--surface); border-radius: 14px; border: 1px dashed var(--line); }
 
-        .header { background: #d32f2f; color: white; padding: 20px; text-align: center; border-bottom: 4px solid #ffeb3b; position: relative; }
-        .theme-switch { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75em; }
-        .fullscreen-btn { position: absolute; top: 10px; right: 145px; background: #388e3c; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75em; font-weight: bold; }
-        .exit-btn { position: absolute; top: 10px; left: 10px; background: #000000; color: #ffffff; border: 2px solid #ffffff; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8em; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+/* detail */
+.det-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.back { display: none; height: 44px; padding: 0 14px 0 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-weight: 650; align-items: center; gap: 6px; flex: none; }
+.back svg { width: 18px; height: 18px; }
+@media (max-width: 999px) { .back { display: inline-flex; } .det-head { flex-direction: column; } }
+.det-head h2 { margin: 0; font-family: var(--font-d); font-size: 28px; font-weight: 750; letter-spacing: -.015em; line-height: 1.15; flex: 1; }
+.det-head .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.tag { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13.5px; font-weight: 650; color: var(--ink-2); }
+.tag svg { width: 15px; height: 15px; }
+.grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 640px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.f { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px 15px; box-shadow: var(--shadow); min-width: 0; }
+.f.wide { grid-column: 1 / -1; }
+.f .l { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px; }
+.f .l svg { width: 16px; height: 16px; }
+.f .v { font-size: 17px; line-height: 1.5; overflow-wrap: anywhere; }
+.f .v a { color: var(--focus); font-weight: 650; text-decoration: none; }
+.f .v a.tel { white-space: nowrap; }
+.f.route { background: var(--route-bg); border-color: color-mix(in srgb, var(--route) 30%, transparent); }
+.f.route .l { color: var(--route); }
+.f.risk { background: var(--risk-bg); border: 1.5px solid var(--risk-line); }
+.f.risk .l { color: var(--risk); }
+.f.risk .v { font-weight: 600; }
+.nav-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; height: 38px; padding: 0 12px; border-radius: 10px; background: var(--focus); color: #fff !important; font-size: 14.5px; font-weight: 700; text-decoration: none; }
+.nav-btn svg { width: 16px; height: 16px; }
+.gal { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-top: 4px; }
+.gal button { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+.gal img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gal .miss { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; color: var(--ink-3); padding: 8px; text-align: center; }
+.det-acts { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; font-weight: 650; background: var(--surface); border: 1px solid var(--line); }
+.btn svg { width: 18px; height: 18px; }
+.btn.pri { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.placeholder { padding: 60px 20px; text-align: center; color: var(--ink-3); background: var(--surface); border: 1px dashed var(--line); border-radius: 16px; }
+.placeholder svg { width: 48px; height: 48px; margin: 0 auto 10px; opacity: .5; }
+.verified { font-size: 13px; color: var(--ink-3); margin-top: 10px; }
 
-        .modal { display: none; position: fixed; z-index: 20000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; }
-        .modal-content { max-width: 98%; max-height: 90vh; object-fit: contain; }
-        .close-btn { position: absolute; top: 15px; right: 15px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 20001; background: #d32f2f; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 3px solid white; }
+/* CBRNE */
+.cb-cats { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.cb-cat { height: 40px; padding: 0 14px; border-radius: 12px; font-weight: 700; font-size: 14.5px; border: 1.5px solid currentColor; background: var(--surface); display: inline-flex; align-items: center; gap: 8px; }
+.cb-cat .k { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; color: #fff; font-size: 12.5px; }
+.cb-cat[aria-pressed="true"] { color: #fff !important; }
+.k-C { --kc: var(--c); } .k-B { --kc: var(--b); } .k-R { --kc: var(--r); } .k-N { --kc: var(--n); } .k-E { --kc: var(--e); }
+.cb-cat { color: var(--kc); } .cb-cat .k { background: var(--kc); } .cb-cat[aria-pressed="true"] { background: var(--kc); } .cb-cat[aria-pressed="true"] .k { background: rgba(255,255,255,.25); }
+.sub { display: flex; gap: 12px; width: 100%; text-align: left; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.sub[aria-current="true"] { border-color: var(--focus); box-shadow: 0 0 0 2px var(--focus); }
+.sub .k { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 800; background: var(--kc); flex: none; }
+.sub .t { flex: 1; min-width: 0; } .sub b { display: block; font-weight: 700; } .sub .s { display: block; font-size: 13.5px; color: var(--ink-2); }
+.pikto { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.pikto figure { margin: 0; width: 76px; text-align: center; }
+.pikto img { width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 10px; padding: 3px; border: 1px solid var(--line); }
+.pikto figcaption { font-size: 11px; color: var(--ink-3); line-height: 1.2; margin-top: 3px; }
+.f.cave { background: #FFF8D6; border: 1.5px solid #E5B800; } :root[data-theme="dark"] .f.cave { background: #2B2608; border-color: #8C7400; }
+.f.cave .l { color: #8C6A00; } :root[data-theme="dark"] .f.cave .l { color: #E5C24A; }
 
-        .exit-dialog { background: var(--card-bg); padding: 30px; border-radius: 15px; text-align: center; border: 4px solid var(--accent); max-width: 400px; width: 85%; }
-        .exit-btns { display: flex; gap: 15px; margin-top: 25px; }
-        .btn-confirm { flex: 1; padding: 15px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-cancel { flex: 1; padding: 15px; background: #555; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+/* propojené látky + dialog */
+.lchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--risk-line); }
+.lchips .h { width: 100%; font-size: 12.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: var(--risk); }
+.lchip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px 6px 6px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--kc); font-weight: 700; font-size: 15px; color: var(--ink); }
+.lchip .k { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; background: var(--kc); font-size: 13px; font-weight: 800; flex: none; }
+.lchip small { font-weight: 500; color: var(--ink-2); font-size: 12.5px; }
+.lchip svg { width: 16px; height: 16px; color: var(--ink-3); }
+.ochips { display: flex; flex-wrap: wrap; gap: 8px; }
+.dlg { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(8, 12, 18, .55); }
+.dlg.on { display: flex; }
+.dlg-box { width: min(860px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--bg); border-radius: 20px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.5); }
+.dlg-top { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.dlg-top .t { flex: 1; font-weight: 700; color: var(--ink-2); font-size: 14px; }
+.dlg-body { padding: 16px; }
+@media (max-width: 640px) { .dlg { padding: 0; align-items: flex-end; } .dlg-box { border-radius: 20px 20px 0 0; max-height: 92vh; } .dlg-top .t { display: none; } .dlg-top { justify-content: flex-end; } }
 
-        .container { width: 96%; max-width: 1200px; margin: 10px auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.2); overflow: hidden; min-height: 90vh; padding-bottom: 20px; }
-        .search-box { padding: 10px 20px 20px 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); }
-        .input-wrapper { position: relative; max-width: 800px; margin: auto; }
-        input { width: 100%; padding: 18px 50px 18px 20px; box-sizing: border-box; border: 2px solid var(--border); border-radius: 10px; font-size: 22px; background: var(--row-bg); color: var(--text-main); }
-        .clear-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 32px; color: #999; display: none; width: 40px; text-align: center; z-index: 10; }
-        
-        .quick-access { max-width: 800px; margin: 10px auto; padding: 0 20px; display: flex; flex-wrap: wrap; gap: 8px; }
-        .chip { padding: 10px 18px; background: var(--row-bg); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; }
+/* METHANE – plovoucí záložka u levého okraje */
+.mth-tab { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 40; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 8px 14px 6px; border-radius: 0 14px 14px 0; background: var(--brand); color: #fff; box-shadow: 4px 0 18px -6px rgba(0,0,0,.45); font-family: var(--font-d); font-weight: 800; font-size: 15px; line-height: 1.05; letter-spacing: .02em; }
+.mth-tab span { display: block; }
+.mth-tab:hover { padding-left: 10px; }
+.mth-scrim { position: fixed; inset: 0; z-index: 44; background: rgba(8, 12, 18, .45); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.mth-scrim.on { opacity: 1; pointer-events: auto; }
+.mth { position: fixed; left: 0; top: 0; bottom: 0; z-index: 45; width: min(400px, 88vw); background: var(--bg); box-shadow: 10px 0 40px -10px rgba(0,0,0,.5); transform: translateX(-102%); transition: transform .25s cubic-bezier(.3,.7,.3,1); display: flex; flex-direction: column; }
+.mth.on { transform: none; }
+.mth-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.mth-head::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 4px; background: var(--brand); }
+.mth-head h2 { margin: 0; flex: 1; font-family: var(--font-d); font-size: 21px; font-weight: 800; }
+.mth-head small { display: block; font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.mth-list { flex: 1; overflow: auto; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.mth-row { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px 10px 10px; box-shadow: var(--shadow); }
+.mth-row .L { width: 48px; height: 48px; border-radius: 12px; background: var(--brand); color: #fff; display: grid; place-items: center; font-family: var(--font-d); font-size: 26px; font-weight: 800; }
+.mth-row b { display: block; font-size: 15px; font-weight: 750; }
+.mth-row .en { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.mth-row .h { display: block; font-size: 14px; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+@media print { .mth-tab, .mth, .mth-scrim { display: none !important; } }
 
-        #seznam { list-style: none; padding: 0; margin: 0; display: none; }
-        #seznam li { padding: 18px 25px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 1.2em; }
-        
-        .karta { display: none; padding: 20px; }
-        .v-nazev { color: var(--accent); border-bottom: 3px solid var(--accent); padding-bottom: 10px; font-size: 1.8em; margin: 0 0 15px 0; }
-        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .full-width { grid-column: span 2; }
-        .info-row { padding: 12px 15px; background: var(--row-bg); border-radius: 8px; border-left: 4px solid var(--border); word-wrap: break-word; overflow-wrap: anywhere; }
-        .label { font-weight: bold; color: var(--accent); display: block; font-size: 0.75em; text-transform: uppercase; }
-        .hodnota { font-size: 1.1em; line-height: 1.4; display: block; }
+/* lightbox */
+.lb { position: fixed; inset: 0; z-index: 100; background: rgba(5, 8, 12, .96); display: none; flex-direction: column; }
+.lb.on { display: flex; }
+.lb-top { display: flex; align-items: center; gap: 8px; padding: 10px 12px; color: #fff; }
+.lb-top .t { flex: 1; font-weight: 650; font-size: 15px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-btn { height: 46px; min-width: 46px; padding: 0 12px; border-radius: 12px; background: rgba(255,255,255,.12); color: #fff; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.lb-btn svg { width: 22px; height: 22px; }
+.lb-btn.close { background: var(--brand); }
+.lb-stage { flex: 1; overflow: auto; display: grid; place-items: center; touch-action: pan-x pan-y pinch-zoom; }
+.lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; }
+.lb-stage.zoom { place-items: start; } .lb-stage.zoom img { max-width: none; max-height: none; }
+.lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.14); color: #fff; display: grid; place-items: center; }
+.lb-nav svg { width: 28px; height: 28px; } .lb-nav.p { left: 12px; } .lb-nav.n { right: 12px; }
 
-        /* CBRNE Stylizace z Kódu 1 */
-        .cbrne-box { margin: 30px 20px; padding: 20px; background: #eceff1; border-radius: 12px; border: 2px solid #546e7a; }
-        body.dark-mode .cbrne-box { background: #263238; border-color: #90a4ae; }
-        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; color: white; font-weight: bold; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; }
-        .cat-c { background: #d32f2f; } .cat-b { background: #388e3c; } .cat-r { background: #f57c00; }
-        .cave-box { grid-column: 1 / -1; background: var(--cave-bg); border-left: 6px solid var(--cave-border); padding: 15px; border-radius: 8px; font-weight: bold; }
-
-        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } .methane-drawer { width: 85vw; } .fullscreen-btn { right: 10px; top: 50px; } }
-    </style>
+.foot { margin-top: 24px; font-size: 13px; color: var(--ink-3); text-align: center; }
+@media print {
+  .top, .list-col, .det-acts, .back, .foot, .gal { display: none !important; }
+  body { background: #fff; color: #000; } .view:not(#v-obj) { display: none !important; } .split { display: block; } body:not(.det) .det-col { display: block; }
+  .f { box-shadow: none; break-inside: avoid; }
+}
+</style>
 </head>
-<body onload="init()">
-
-<div class="methane-sidebar" id="methaneSidebar">
-    <div class="methane-tab" onclick="toggleMethane()">M E T H A N E</div>
-    <div class="methane-drawer">
-        <h3 style="margin-top:0; color:#d32f2f; border-bottom: 2px solid #ffeb3b; padding-bottom: 10px;">Hlášení METHANE</h3>
-        <div class="m-item"><span class="m-letter">M</span><span class="m-text"><b>MY CALLSIGN</b>Identifikace</span></div>
-        <div class="m-item"><span class="m-letter">E</span><span class="m-text"><b>EXACT LOCATION</b>Místo, GPS</span></div>
-        <div class="m-item"><span class="m-letter">T</span><span class="m-text"><b>TYPE OF INCIDENT</b>Typ události</span></div>
-        <div class="m-item"><span class="m-letter">H</span><span class="m-text"><b>HAZARDS</b>Rizika</span></div>
-        <div class="m-item"><span class="m-letter">A</span><span class="m-text"><b>ACCESS</b>Příjezd</span></div>
-        <div class="m-item"><span class="m-letter">N</span><span class="m-text"><b>NUMBER OF CASUALTIES</b>Zranění</span></div>
-        <div class="m-item"><span class="m-letter">E</span><span class="m-text"><b>EMERGENCY SERVICES</b>Síly a prostředky</span></div>
-        <button onclick="toggleMethane()" style="margin-top:15px; padding:15px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; width: 100%;">ZAVŘÍT</button>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/><path d="M12 8v4M10 10h4"/></svg></div>
+      <div><h1>Operativní karty</h1><small>ZZS Ústeckého kraje</small></div>
     </div>
-</div>
-
-<div id="myModal" class="modal">
-    <span class="close-btn" onclick="closeModal()">×</span>
-    <img class="modal-content" id="img01">
-</div>
-
-<div id="exitModal" class="modal">
-    <div class="exit-dialog">
-        <h3 style="margin-top:0;">Ukončit aplikaci?</h3>
-        <p>Opravdu chceš zavřít Operativní karty?</p>
-        <div class="exit-btns">
-            <button class="btn-confirm" onclick="confirmExit()">ANO, UKONČIT</button>
-            <button class="btn-cancel" onclick="closeExitModal()">ZRUŠIT</button>
-        </div>
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="obj" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l5 3V10l5 3V6l4 2v13"/></svg>Objekty</button>
+      <button type="button" role="tab" data-tab="cb" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>CBRNE</button>
+    </nav>
+    <div class="acts">
+      <button type="button" class="icon-btn" id="b-full" title="Celá obrazovka" aria-label="Celá obrazovka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button type="button" class="icon-btn" id="b-theme" title="Světlý / tmavý režim" aria-label="Světlý nebo tmavý režim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
     </div>
-</div>
+  </div>
+</header>
 
-<div class="container">
-    <div class="header">
-        <button class="exit-btn" onclick="openExitModal()">❌ UKONČIT</button>
-        <button class="theme-switch" id="themeBtn" onclick="toggleTheme()">🌙 TMAVÝ REŽIM</button>
-        <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullScreen()">🖥️ FULLSCREEN</button>
-        <h2><b>OPERATIVNÍ KARTY</b><br>ZZS Ústeckého kraje</h2>
+<main>
+  <!-- OBJEKTY -->
+  <section class="view on" id="v-obj">
+    <div class="split">
+      <div class="list-col">
+        <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Firma, obec, okres, riziko…" autocomplete="off" aria-label="Hledat objekt"><button type="button" class="x" id="q-x" hidden aria-label="Smazat hledání">✕</button></label>
+        <div class="chips" id="okresy"></div>
+        <div class="count" id="count"></div>
+        <div class="list" id="list"></div>
+      </div>
+      <div class="det-col" id="det"></div>
     </div>
+  </section>
 
-    <div class="search-box">
-        <div class="input-wrapper">
-            <input type="text" id="hledat" placeholder="Hledej firmu nebo okres..." oninput="filtrovat()" autocomplete="off">
-            <span id="clearBtn" class="clear-btn" onclick="smazatHledani()">✕</span>
-        </div>
+  <!-- CBRNE -->
+  <section class="view" id="v-cb">
+    <div class="split">
+      <div class="list-col">
+        <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cq" type="search" placeholder="Látka, UN kód, CAS, příznak…" autocomplete="off" aria-label="Hledat látku"><button type="button" class="x" id="cq-x" hidden aria-label="Smazat hledání">✕</button></label>
+        <div class="cb-cats" id="cats"></div>
+        <div class="count" id="ccount"></div>
+        <div class="list" id="clist"></div>
+      </div>
+      <div class="det-col" id="cdet"></div>
     </div>
+  </section>
 
-    <div id="quickAccess" class="quick-access"></div>
-    <ul id="seznam"></ul>
+  <div class="foot" id="foot"></div>
+</main>
 
-    <div id="vypis" class="karta">
-        <h3 id="v-nazev" class="v-nazev"></h3>
-        <div class="info-grid">
-            <div class="info-row"><span class="label">📍 ADRESA:</span><span id="v-adresa" class="hodnota"></span></div>
-            <div class="info-row"><span class="label">📞 KONTAKT:</span><span id="v-kontakt" class="hodnota"></span></div>
-            <div class="info-row"><span class="label">🕒 PROVOZ:</span><span id="v-doba" class="hodnota"></span></div>
-            <div class="info-row"><span class="label">👥 ZAMĚSTNANCI:</span><span id="v-zamestnanci" class="hodnota"></span></div>
-            <div class="info-row full-width" style="background:var(--char-bg); border-color:var(--char-border)"><span class="label">🏢 Charakter:</span><span id="v-charakter" class="hodnota"></span></div>
-            <div class="info-row full-width" style="background:var(--rizika-bg); border-color:var(--rizika-border)"><span class="label">⚠️ Rizika:</span><span id="v-rizika" class="hodnota"></span></div>
-        </div>
-        <button id="v-mapa-btn" onclick="openModal()" style="width:100%; margin-top:15px; padding:20px; background:#1a237e; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size:1.1em;">🗺️ ZOBRAZIT PLÁNEK</button>
-    </div>
-
-    <hr style="margin: 40px 0; opacity: 0.1;">
-
-    <div class="cbrne-box">
-        <h3 style="margin-top:0; text-align: center;">🛡️ DATABÁZE CBRNE RIZIK </h3>
-        <div class="input-wrapper" style="max-width: 800px; margin-bottom: 15px;">
-            <input type="text" id="cbrneSearch" style="font-size: 18px; padding: 15px;" placeholder="Hledej látku, UN kód, virus..." oninput="filterCBRNE()">
-            <span id="cbrneClear" class="clear-btn" onclick="smazatCbrne()">✕</span>
-        </div>
-        
-        <div id="cbrneResult" style="display:none; background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--border);">
-            <div id="cbrneBadge" class="badge"></div>
-            <div id="cbrnePiktogramy" style="float:right;"></div>
-            <h2 id="cbrneTitle" style="margin:0;"></h2>
-            <div id="cbrneSub" style="font-style:italic; color:gray; margin-bottom:20px;"></div>
-            
-            <div class="info-grid">
-                <div class="info-row full-width" style="background:var(--cbrne-vlastnosti-bg); border-color:var(--cbrne-vlastnosti-border)"><span class="label">⚙️ VLASTNOSTI:</span><div id="cb-vlastnosti" class="hodnota"></div></div>
-                <div class="info-row full-width" style="background:var(--cbrne-oopp-bg); border-color:var(--cbrne-oopp-border)"><span class="label">🛡️ OOPP/DEKONTA:</span><div id="cb-opp" class="hodnota"></div></div>
-                <div class="info-row full-width" style="background:var(--cbrne-klinika-bg); border-color:var(--cbrne-klinika-border)"><span class="label">🩺 KLINICKÉ PROJEVY:</span><div id="cb-clin" class="hodnota"></div></div>
-                <div class="info-row full-width" style="background:var(--cbrne-pomoc-bg); border-color:var(--cbrne-pomoc-border)"><span class="label">💊 PRVNÍ POMOC/LÉČBA:</span><div id="cb-aid" class="hodnota"></div></div>
-                <div class="cave-box"><span class="label">⚠️ CAVE:</span><div id="cb-cave" class="hodnota"></div></div>
-            </div>
-        </div>
-    </div>
-    
-    <div id="status" style="text-align:center; font-size:0.8em; margin:20px 0; color: var(--text-sub);"></div>
+<button type="button" class="mth-tab" id="mth-tab" aria-label="Hlášení METHANE" aria-expanded="false"><span>M</span><span>E</span><span>T</span><span>H</span><span>A</span><span>N</span><span>E</span></button>
+<div class="mth-scrim" id="mth-scrim"></div>
+<aside class="mth" id="mth" aria-label="Hlášení METHANE"><div class="mth-head"><h2>Hlášení METHANE<small>struktura prvotního hlášení z místa MU</small></h2><button type="button" class="btn pri" id="mth-x">Zavřít</button></div><div class="mth-list" id="mth-list"></div></aside>
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-label="CBRNE látka"><div class="dlg-box"><div class="dlg-top"><span class="t">CBRNE látka v objektu</span><button type="button" class="btn" id="dlg-open">Otevřít v CBRNE</button><button type="button" class="btn pri" id="dlg-x">Zavřít</button></div><div class="dlg-body" id="dlg-body"></div></div></div>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Mapový podklad">
+  <div class="lb-top"><span class="t" id="lb-t"></span>
+    <button type="button" class="lb-btn" id="lb-zoom" title="Přiblížit / přizpůsobit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8 11h6M11 8v6"/></svg></button>
+    <button type="button" class="lb-btn close" id="lb-x" aria-label="Zavřít"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
+  <button type="button" class="lb-nav p" id="lb-p" aria-label="Předchozí"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+  <button type="button" class="lb-nav n" id="lb-n" aria-label="Další"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
 </div>
 
 <script src="data.js"></script>
 <script src="cbrne.js"></script>
 <script>
-    const okresyUK = ["Děčín", "Chomutov", "Litoměřice", "Louny", "Most", "Teplice", "Ústí n. L."];
-    let activeMap = "";
+'use strict';
+/* Aplikace čte VÝHRADNĚ data ze souborů data.js a cbrne.js (žádný localStorage) */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const norm = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const plain = (h) => String(h ?? '').replace(/<br\s*\/?>|\n/gi, ' · ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+// pole z adminu: HTML nebo prostý text s novými řádky
+const rich = (h) => { const s = String(h ?? '').trim(); if (!s) return '<span style="color:var(--ink-3)">–</span>'; return /<[a-z]/i.test(s) ? s.replace(/\s*\n\s*/g, '<br>') : esc(s).replace(/\n/g, '<br>'); };
+const telify = (html) => html.replace(/(\+?420[\s ]?)?(\d{3}[\s ]?\d{3}[\s ]?\d{3})(?![^<]*>)/g, (m) => `<a class="tel" href="tel:${m.replace(/[\s ]/g, '')}">${m}</a>`);
+const FIRMY = (typeof firmy !== 'undefined' ? firmy : []).slice().sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
+const CB = (typeof cbrneData !== 'undefined' ? cbrneData : []).slice().sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
+const META = typeof OPKA_META !== 'undefined' ? OPKA_META : null;
+const OKRESY = ['Děčín', 'Chomutov', 'Litoměřice', 'Louny', 'Most', 'Teplice', 'Ústí n. L.'];
+const PIK = {
+  'ghs01_explosive.png': 'Výbušné', 'ghs02_flammable.png': 'Hořlavé', 'ghs03_oxidizing.png': 'Oxidující', 'ghs04_compressed.png': 'Plyn pod tlakem',
+  'ghs05_corrosive.png': 'Žíravé', 'ghs06_toxic.png': 'Toxické', 'ghs07_harmful.png': 'Dráždivé', 'ghs08_health.png': 'Nebezpečné pro zdraví', 'ghs09_environment.png': 'Životní prostředí',
+  'sym_radioactive.png': 'Ionizující záření', 'sym_laser.png': 'Laser', 'sym_explosive.png': 'Výbušná látka', 'sym_flammable.png': 'Hořlavá látka', 'sym_toxic.png': 'Toxická látka',
+  'sym_corrosive.png': 'Žíravina', 'sym_biohazard.png': 'Biologické riziko', 'sym_high_voltage.png': 'Vysoké napětí', 'sym_cryogenic.png': 'Kryogenní', 'sym_magnetic.png': 'Magnetické pole', 'sym_non_ionizing.png': 'Neionizující záření',
+};
+const KAT = { C: 'Chemické', B: 'Biologické', R: 'Radiologické', N: 'Nukleární', E: 'Výbušniny' };
+const I = {
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg>',
+  bldg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l5 3V10l5 3V6l4 2v13"/></svg>',
+  route: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H16"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  nav: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 3 3 7.5z"/></svg>',
+  print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>',
+  flask: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/></svg>',
+};
 
-    function init() {
-        if (typeof firmy !== 'undefined') {
-            firmy.sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
-            document.getElementById('status').textContent = `Databáze: ${firmy.length} objektů.`;
-            vykresliOkresy();
-        }
-    }
+/* ---------- přepínání ---------- */
+const UI = { tab: 'obj', okres: null, cur: null, kat: null, ccur: null };
+function setTab(t) {
+  UI.tab = t;
+  document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t));
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === 'v-' + t));
+  document.body.classList.toggle('det', (t === 'obj' && !!UI.cur) || (t === 'cb' && !!UI.ccur));
+  window.scrollTo(0, 0);
+}
+document.querySelector('.tabs').onclick = (e) => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); };
 
-    function toggleTheme() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        document.getElementById('themeBtn').textContent = isDark ? "☀️ SVĚTLÝ REŽIM" : "🌙 TMAVÝ REŽIM";
-    }
+/* ---------- objekty ---------- */
+function hl(text, q) {
+  const t = esc(text); if (!q) return t;
+  const n = norm(text), i = n.indexOf(q); if (i < 0) return t;
+  return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+}
+function renderOkresy() {
+  $('okresy').innerHTML = `<button type="button" class="chip" data-ok="" aria-pressed="${!UI.okres}">Všechny <span class="n">${FIRMY.length}</span></button>` +
+    OKRESY.map((o) => { const n = FIRMY.filter((f) => f.okres === o).length; return `<button type="button" class="chip" data-ok="${o}" aria-pressed="${UI.okres === o}">${o} <span class="n">${n}</span></button>`; }).join('');
+}
+function renderList() {
+  const q = norm($('q').value.trim());
+  $('q-x').hidden = !q;
+  const xs = FIRMY.filter((f) => (!UI.okres || f.okres === UI.okres) && (!q || norm([f.nazev, f.adresa, f.okres, plain(f.rizika), plain(f.charakter)].join(' ')).includes(q)));
+  $('count').textContent = xs.length === FIRMY.length ? `${xs.length} objektů` : `${xs.length} z ${FIRMY.length} objektů`;
+  $('list').innerHTML = xs.map((f) => {
+    const i = FIRMY.indexOf(f), r = plain(f.rizika);
+    return `<button type="button" class="obj" data-i="${i}" aria-current="${UI.cur === i}"><span class="ic">${I.warn}</span><span class="t"><b>${hl(f.nazev, q)}</b><span class="s">${esc(f.okres || '')}${f.adresa ? ' · ' + hl(f.adresa, q) : ''}</span>${r ? `<span class="r">${hl(r, q)}</span>` : ''}</span></button>`;
+  }).join('') || '<div class="empty">Nic nenalezeno.</div>';
+}
+function latkyObj(f) { return (f.latky || []).map((id) => CB.find((l) => l.id === id)).filter(Boolean); }
+function ovText(o) { if (!o) return ''; if (typeof o === 'string') return o; const d = o.datum ? o.datum.split('-').reverse().map((x) => String(+x)).join('. ') : ''; return [d, o.kdo, o.pozn].filter(Boolean).join(' · '); }
+function mapy(f) { return [].concat(f.mapa || []).filter(Boolean); }
+function renderDetail() {
+  const f = FIRMY[UI.cur];
+  if (!f) { $('det').innerHTML = `<div class="placeholder">${I.bldg}Vyber objekt ze seznamu.</div>`; return; }
+  const m = mapy(f);
+  const nav = f.adresa ? `<a class="nav-btn" href="https://mapy.cz/zakladni?q=${encodeURIComponent(plain(f.adresa))}" target="_blank" rel="noopener">${I.nav}Navigovat</a>` : '';
+  $('det').innerHTML = `
+    <div class="det-head"><button type="button" class="back" id="back">${I.back}Seznam</button>
+      <div style="flex:1;min-width:0"><h2>${esc(f.nazev)}</h2><div class="meta">${f.okres ? `<span class="tag">${I.pin}okres ${esc(f.okres)}</span>` : ''}${m.length ? `<span class="tag">${I.map}${m.length} ${m.length === 1 ? 'podklad' : m.length < 5 ? 'podklady' : 'podkladů'}</span>` : ''}</div></div></div>
+    <div class="grid">
+      <div class="f"><div class="l">${I.pin}Adresa</div><div class="v">${rich(f.adresa)}${nav ? '<br>' + nav : ''}</div></div>
+      <div class="f"><div class="l">${I.phone}Kontakt</div><div class="v">${telify(rich(f.kontakt))}</div></div>
+      <div class="f"><div class="l">${I.clock}Provozní doba</div><div class="v">${rich(f.doba)}</div></div>
+      <div class="f"><div class="l">${I.people}Počet zaměstnanců</div><div class="v">${rich(f.zamestnanci)}</div></div>
+      <div class="f wide"><div class="l">${I.bldg}Charakter objektu</div><div class="v">${rich(f.charakter)}</div></div>
+      <div class="f wide route"><div class="l">${I.route}Přístupová trasa</div><div class="v">${rich(f.trasa)}</div></div>
+      <div class="f wide risk"><div class="l">${I.warn}Rizika</div><div class="v">${rich(f.rizika)}</div>${latkyObj(f).length ? `<div class="lchips"><span class="h">CBRNE látky v objektu – ťukni pro detail</span>${latkyObj(f).map((l) => { const k = katOf(l); return `<button type="button" class="lchip k-${k}" data-lat="${esc(l.id)}"><span class="k">${k}</span><span>${esc(l.nazev)}${l.identifikace ? `<br><small>${esc(l.identifikace)}</small>` : ''}</span>${I.info}</button>`; }).join('')}</div>` : ''}</div>
+      <div class="f wide"><div class="l">${I.map}Mapové podklady</div>${m.length ? `<div class="gal">${m.map((x, i) => `<button type="button" data-map="${i}" aria-label="Otevřít ${esc(x)}"><img src="mapy/${encodeURI(x)}" alt="" loading="lazy" onerror="this.remove();this.parentNode.insertAdjacentHTML('beforeend','<span class=miss>Soubor nenalezen<br>${esc(x)}</span>')"></button>`).join('')}</div>` : '<div class="v" style="color:var(--ink-3)">Bez mapových podkladů</div>'}</div>
+    </div>
+    ${ovText(f.overeno) ? `<div class="verified">Údaje ověřeny: ${esc(ovText(f.overeno))}</div>` : ''}
+    <div class="det-acts"><button type="button" class="btn" onclick="window.print()">${I.print}Tisk / PDF</button></div>`;
+}
+function openObj(i) { UI.cur = i; renderList(); renderDetail(); document.body.classList.add('det'); if (window.innerWidth < 1000) window.scrollTo(0, 0); }
+$('list').onclick = (e) => { const b = e.target.closest('[data-i]'); if (b) openObj(+b.dataset.i); };
+$('okresy').onclick = (e) => { const b = e.target.closest('[data-ok]'); if (!b) return; UI.okres = b.dataset.ok || null; renderOkresy(); renderList(); };
+$('q').oninput = renderList;
+$('q-x').onclick = () => { $('q').value = ''; renderList(); $('q').focus(); };
+$('det').addEventListener('click', (e) => {
+  if (e.target.closest('#back')) { UI.cur = null; document.body.classList.remove('det'); renderList(); return; }
+  const lt = e.target.closest('[data-lat]'); if (lt) { openDlg(lt.dataset.lat); return; }
+  const b = e.target.closest('[data-map]'); if (b) openLB(mapy(FIRMY[UI.cur]), +b.dataset.map);
+});
 
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            document.getElementById('fullscreenBtn').textContent = "📺 OKNO";
-        } else {
-            document.exitFullscreen();
-            document.getElementById('fullscreenBtn').textContent = "🖥️ FULLSCREEN";
-        }
-    }
+/* ---------- lightbox ---------- */
+const LB = { list: [], i: 0 };
+function openLB(list, i) { LB.list = list; LB.i = i; $('lb').classList.add('on'); showLB(); }
+function showLB() {
+  const x = LB.list[LB.i]; $('lb-img').src = 'mapy/' + encodeURI(x); $('lb-stage').classList.remove('zoom');
+  $('lb-t').textContent = (LB.list.length > 1 ? `${LB.i + 1} / ${LB.list.length} · ` : '') + x;
+  $('lb-p').hidden = $('lb-n').hidden = LB.list.length < 2;
+}
+function navLB(d) { LB.i = (LB.i + d + LB.list.length) % LB.list.length; showLB(); }
+$('lb-x').onclick = () => $('lb').classList.remove('on');
+$('lb-p').onclick = () => navLB(-1); $('lb-n').onclick = () => navLB(1);
+$('lb-zoom').onclick = () => $('lb-stage').classList.toggle('zoom');
+$('lb-img').ondblclick = () => $('lb-stage').classList.toggle('zoom');
+document.addEventListener('keydown', (e) => { if (!$('lb').classList.contains('on')) return; if (e.key === 'Escape') $('lb').classList.remove('on'); if (e.key === 'ArrowLeft') navLB(-1); if (e.key === 'ArrowRight') navLB(1); });
+(() => { let x0 = null; const st = $('lb-stage'); st.addEventListener('touchstart', (e) => { x0 = e.touches.length === 1 && !st.classList.contains('zoom') ? e.touches[0].clientX : null; }, { passive: true }); st.addEventListener('touchend', (e) => { if (x0 == null) return; const d = e.changedTouches[0].clientX - x0; if (Math.abs(d) > 60) navLB(d < 0 ? 1 : -1); x0 = null; }, { passive: true }); })();
 
-    function openExitModal() { document.getElementById('exitModal').style.display = 'flex'; }
-    function closeExitModal() { document.getElementById('exitModal').style.display = 'none'; }
-    function confirmExit() { window.close(); closeExitModal(); }
+/* ---------- CBRNE ---------- */
+const katOf = (l) => (l.kategorie || 'C').trim().charAt(0).toUpperCase();
+function renderCats() {
+  $('cats').innerHTML = Object.entries(KAT).map(([k, n]) => { const c = CB.filter((l) => katOf(l) === k).length; return `<button type="button" class="cb-cat k-${k}" data-kat="${k}" aria-pressed="${UI.kat === k}"><span class="k">${k}</span>${n} <span style="opacity:.7;font-weight:600">${c}</span></button>`; }).join('');
+}
+function renderCList() {
+  const q = norm($('cq').value.trim()); $('cq-x').hidden = !q;
+  const xs = CB.filter((l) => (!UI.kat || katOf(l) === UI.kat) && (!q || norm([l.nazev, l.identifikace, plain(l.klinika), plain(l.vlastnosti)].join(' ')).includes(q)));
+  $('ccount').textContent = `${xs.length} ${xs.length === 1 ? 'látka' : xs.length < 5 && xs.length ? 'látky' : 'látek'}`;
+  $('clist').innerHTML = xs.map((l) => { const i = CB.indexOf(l), k = katOf(l); return `<button type="button" class="sub k-${k}" data-c="${i}" aria-current="${UI.ccur === i}"><span class="k">${k}</span><span class="t"><b>${hl(l.nazev, q)}</b><span class="s">${hl(l.identifikace || '', q)}</span></span></button>`; }).join('') || '<div class="empty">Nic nenalezeno.</div>';
+}
+function cbHtml(l, inDlg) {
+  const k = katOf(l), objs = FIRMY.map((f, i) => [f, i]).filter(([f]) => (f.latky || []).includes(l.id));
+  return `
+    <div class="det-head">${inDlg ? '' : `<button type="button" class="back" id="cback">${I.back}Seznam</button>`}
+      <div style="flex:1;min-width:0"><h2>${esc(l.nazev)}</h2><div class="meta"><span class="tag k-${k}" style="color:var(--kc)"><b>${k}</b>&nbsp;${KAT[k] || ''}</span>${l.identifikace ? `<span class="tag">${esc(l.identifikace)}</span>` : ''}</div>
+      ${(l.piktogramy || []).length ? `<div class="pikto">${l.piktogramy.map((p) => `<figure><img src="img/${encodeURI(p)}" alt="${esc(PIK[p] || p)}" onerror="this.parentNode.remove()"><figcaption>${esc(PIK[p] || '')}</figcaption></figure>`).join('')}</div>` : ''}</div></div>
+    <div class="grid">
+      <div class="f wide"><div class="l">Vlastnosti</div><div class="v">${rich(l.vlastnosti)}</div></div>
+      <div class="f wide route"><div class="l">OOPP / dekontaminace</div><div class="v">${rich(l.oopp)}</div></div>
+      <div class="f wide"><div class="l">Klinické projevy</div><div class="v">${rich(l.klinika)}</div></div>
+      <div class="f wide" style="border-left:4px solid var(--b)"><div class="l">První pomoc / léčba</div><div class="v">${rich(l.lecba)}</div></div>
+      <div class="f wide cave"><div class="l">${I.warn}CAVE</div><div class="v">${rich(l.cave)}</div></div>
+      ${!inDlg && objs.length ? `<div class="f wide"><div class="l">${I.bldg}Výskyt v objektech</div><div class="ochips">${objs.map(([f, i]) => `<button type="button" class="chip" data-goobj="${i}">${esc(f.nazev)}</button>`).join('')}</div></div>` : ''}
+    </div>
+    <div class="verified">Toxikologické informační středisko (nonstop): 224 919 293, 224 915 402</div>`;
+}
+function renderCDetail() {
+  const l = CB[UI.ccur];
+  if (!l) { $('cdet').innerHTML = `<div class="placeholder">${I.flask}Vyber látku ze seznamu nebo kategorii.</div>`; return; }
+  $('cdet').innerHTML = cbHtml(l, false);
+}
+/* dialog látky z karty objektu */
+let dlgId = null;
+function openDlg(id) { const l = CB.find((x) => x.id === id); if (!l) return; dlgId = id; $('dlg-body').innerHTML = cbHtml(l, true); $('dlg').classList.add('on'); $('dlg').querySelector('.dlg-box').scrollTop = 0; }
+function closeDlg() { $('dlg').classList.remove('on'); }
+$('dlg-x').onclick = closeDlg;
+$('dlg').onclick = (e) => { if (e.target === $('dlg')) closeDlg(); };
+$('dlg-open').onclick = () => { const i = CB.findIndex((x) => x.id === dlgId); closeDlg(); setTab('cb'); UI.kat = null; $('cq').value = ''; renderCats(); openC(i); };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('dlg').classList.contains('on')) closeDlg(); });
+function openC(i) { UI.ccur = i; renderCList(); renderCDetail(); document.body.classList.add('det'); if (window.innerWidth < 1000) window.scrollTo(0, 0); }
+$('clist').onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) openC(+b.dataset.c); };
+$('cats').onclick = (e) => { const b = e.target.closest('[data-kat]'); if (!b) return; UI.kat = UI.kat === b.dataset.kat ? null : b.dataset.kat; renderCats(); renderCList(); };
+$('cq').oninput = renderCList;
+$('cq-x').onclick = () => { $('cq').value = ''; renderCList(); };
+$('cdet').addEventListener('click', (e) => {
+  if (e.target.closest('#cback')) { UI.ccur = null; document.body.classList.remove('det'); renderCList(); return; }
+  const g = e.target.closest('[data-goobj]'); if (g) { setTab('obj'); UI.okres = null; $('q').value = ''; renderOkresy(); openObj(+g.dataset.goobj); }
+});
 
-    function toggleMethane() { document.getElementById('methaneSidebar').classList.toggle('active'); }
-    function openModal() { if(activeMap){ document.getElementById('img01').src = "mapy/" + activeMap; document.getElementById('myModal').style.display = "flex"; } }
-    function closeModal() { document.getElementById('myModal').style.display = "none"; }
+/* ---------- METHANE (jen přehled) ---------- */
+const MT = [
+  ['M', 'My callsign / Major incident', 'Volací znak, vyhlášení mimořádné události'],
+  ['E', 'Exact location', 'Přesné místo, GPS, nástupní místo'],
+  ['T', 'Type of incident', 'Typ události – požár, výbuch, únik látky, DN…'],
+  ['H', 'Hazards', 'Rizika současná i hrozící – únik, požár, zřícení, elektřina'],
+  ['A', 'Access', 'Příjezdová trasa, vjezd, místo pro LZS, shromaždiště'],
+  ['N', 'Number of casualties', 'Počet a závažnost postižených (odhad)'],
+  ['E', 'Emergency services', 'Přítomné složky a potřebné další síly'],
+];
+$('mth-list').innerHTML = MT.map(([L, en, h]) => `<div class="mth-row"><div class="L">${L}</div><div><span class="en">${en}</span><span class="h">${h}</span></div></div>`).join('');
+function mth(on) { $('mth').classList.toggle('on', on); $('mth-scrim').classList.toggle('on', on); $('mth-tab').setAttribute('aria-expanded', on); }
+$('mth-tab').onclick = () => mth(!$('mth').classList.contains('on'));
+$('mth-x').onclick = () => mth(false); $('mth-scrim').onclick = () => mth(false);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') mth(false); });
 
-    function vykresliOkresy() {
-        const c = document.getElementById('quickAccess');
-        okresyUK.forEach(o => {
-            const chip = document.createElement('div');
-            chip.className = 'chip'; chip.textContent = o;
-            chip.onclick = () => { document.getElementById('hledat').value = o; filtrovat(); };
-            c.appendChild(chip);
-        });
-    }
+/* ---------- režim, fullscreen ---------- */
+$('b-theme').onclick = () => { const d = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = d; try { localStorage.setItem('opka_theme', d); } catch (e) {} };
+$('b-full').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.(); };
 
-    function filtrovat() {
-        const hledej = document.getElementById('hledat').value.toLowerCase().trim();
-        const ul = document.getElementById('seznam');
-        const karta = document.getElementById('vypis');
-        document.getElementById('clearBtn').style.display = hledej.length > 0 ? 'block' : 'none';
-        ul.innerHTML = '';
-        if (hledej.length < 1) { ul.style.display = 'none'; karta.style.display = 'none'; return; }
-        const vysledek = firmy.filter(f => f.nazev.toLowerCase().includes(hledej) || f.okres.toLowerCase().includes(hledej));
-        if (vysledek.length > 0) {
-            ul.style.display = 'block';
-            vysledek.slice(0, 15).forEach(f => {
-                const li = document.createElement('li');
-                li.textContent = f.nazev;
-                li.onclick = () => {
-                    ul.style.display = 'none'; karta.style.display = 'block';
-                    document.getElementById('v-nazev').textContent = f.nazev;
-                    document.getElementById('v-adresa').textContent = f.adresa;
-                    document.getElementById('v-kontakt').textContent = f.kontakt;
-                    document.getElementById('v-doba').textContent = f.doba;
-                    document.getElementById('v-zamestnanci').textContent = f.zamestnanci;
-                    document.getElementById('v-charakter').innerHTML = f.charakter;
-                    document.getElementById('v-rizika').innerHTML = f.rizika;
-                    activeMap = Array.isArray(f.mapa) ? f.mapa[0] : f.mapa;
-                    document.getElementById('v-mapa-btn').style.display = activeMap ? "block" : "none";
-                };
-                ul.appendChild(li);
-            });
-        }
-    }
-
-    // LOGIKA CBRNE PŘESNĚ Z KÓDU 1
-    function filterCBRNE() {
-        const query = document.getElementById('cbrneSearch').value.toLowerCase().trim();
-        const resBox = document.getElementById('cbrneResult');
-        document.getElementById('cbrneClear').style.display = query.length > 0 ? 'block' : 'none';
-        if (query.length < 2) { resBox.style.display = 'none'; return; }
-        
-        const latka = cbrneData.find(l => l.nazev.toLowerCase().includes(query) || l.identifikace.toLowerCase().includes(query));
-        if (latka) {
-            resBox.style.display = 'block';
-            document.getElementById('cbrneTitle').textContent = latka.nazev;
-            document.getElementById('cbrneSub').textContent = latka.identifikace;
-            document.getElementById('cb-vlastnosti').innerHTML = latka.vlastnosti || "-";
-            document.getElementById('cb-opp').innerHTML = latka.oopp || "-";
-            document.getElementById('cb-clin').innerHTML = latka.klinika || latka.kontakt || "-";
-            document.getElementById('cb-aid').innerHTML = latka.lecba || "-";
-            document.getElementById('cb-cave').innerHTML = latka.cave || "-";
-            const pikto = document.getElementById('cbrnePiktogramy');
-            pikto.innerHTML = '';
-            if (latka.piktogramy) {
-                latka.piktogramy.forEach(p => {
-                    const img = document.createElement('img');
-                    img.src = "img/" + p; img.style.width = "50px"; img.style.marginLeft = "5px";
-                    img.onerror = () => img.style.display = 'none';
-                    pikto.appendChild(img);
-                });
-            }
-            const b = document.getElementById('cbrneBadge');
-            const k = latka.kategorie || "C";
-            b.textContent = k;
-            b.className = 'badge ' + (k.includes('C') ? 'cat-c' : k.includes('B') ? 'cat-b' : 'cat-r');
-        } else { resBox.style.display = 'none'; }
-    }
-
-    function smazatHledani() { document.getElementById('hledat').value = ''; filtrovat(); }
-    function smazatCbrne() { document.getElementById('cbrneSearch').value = ''; filterCBRNE(); }
+/* ---------- start ---------- */
+$('foot').textContent = `${FIRMY.length} objektů · ${CB.length} CBRNE látek` + (META ? ` · data verze ${META.verze} z ${META.datum}${META.spravce ? ' · ' + META.spravce : ''}` : '');
+renderOkresy(); renderList(); renderDetail(); renderCats(); renderCList(); renderCDetail();
 </script>
 </body>
 </html>

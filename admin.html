@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Správa – Operativní karty</title>
+<link rel="icon" href="OPKA_icon.ico">
+<script>try { const t = localStorage.getItem('opka_theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<style>
+:root {
+  --bg: #EEF0F3; --surface: #FFFFFF; --surface-2: #F6F7F9; --ink: #121821; --ink-2: #4A5565; --ink-3: #8A94A3;
+  --line: #DCE0E6; --brand: #C62828; --focus: #1F5FBF; --focus-bg: #EAF2FF;
+  --ok: #157F3B; --ok-bg: #E8F6EE; --warn: #B54708; --warn-bg: #FFF4E5; --err: #C62828; --err-bg: #FDECEC;
+  --c: #C62828; --b: #2E7D32; --r: #D97706; --n: #3949AB; --e: #880E4F;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 16px -6px rgba(16, 24, 40, .12);
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-d: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0E1217; --surface: #171C23; --surface-2: #1E242D; --ink: #E8ECF1; --ink-2: #A9B3C1; --ink-3: #6E7887;
+  --line: #2A323D; --brand: #E5484D; --focus: #6EA8FE; --focus-bg: #13233A;
+  --ok: #4FD08F; --ok-bg: #11291C; --warn: #FFB648; --warn-bg: #2A1F0E; --err: #FF6B6E; --err-bg: #2C1517;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body { font-family: var(--font); font-size: 15.5px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+svg { display: block; }
+
+/* lišta */
+.top { position: sticky; top: 0; z-index: 30; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top::before { content: ""; display: block; height: 4px; background: var(--brand); }
+.bar { display: flex; align-items: center; gap: 14px; padding: 10px 18px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 40px; height: 40px; border-radius: 11px; background: var(--brand); color: #fff; display: grid; place-items: center; }
+.logo svg { width: 24px; height: 24px; }
+.brand h1 { margin: 0; font-family: var(--font-d); font-size: 19px; font-weight: 750; line-height: 1.1; }
+.brand small { display: block; font-size: 13px; color: var(--ink-2); }
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); }
+.tabs button { height: 40px; padding: 0 16px; border-radius: 11px; font-weight: 650; color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.tabs .cnt { font-size: 12px; font-weight: 750; padding: 1px 7px; border-radius: 9px; background: var(--warn-bg); color: var(--warn); }
+.grow { flex: 1; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 650; padding: 6px 12px; border-radius: 10px; }
+.status .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.status.ok { background: var(--ok-bg); color: var(--ok); } .status.warn { background: var(--warn-bg); color: var(--warn); }
+.icon-btn { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; color: var(--ink-2); border: 1px solid var(--line); background: var(--surface); }
+.icon-btn svg { width: 19px; height: 19px; }
+.who { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 650; color: var(--ink-2); }
+.who select, .fld select { height: 40px; padding: 0 10px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface); font-weight: 650; }
+.who.need select { border-color: var(--err); box-shadow: 0 0 0 2px var(--err-bg); }
+.fld select { background: var(--surface-2); font-weight: 500; width: 100%; }
+.date-row { display: flex; gap: 8px; } .date-row input { flex: 1; }
+.sprl { list-style: none; margin: 0 0 10px; padding: 0; } .sprl li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); } .sprl li:first-child { border-top: 0; } .sprl li span { flex: 1; font-weight: 600; }
+@media (max-width: 1500px) { .brand small { display: none; } .bar { gap: 10px; } .brand h1 { font-size: 17px; } .tabs button { padding: 0 12px; } }
+.notice { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 18px; font-size: 14.5px; border-bottom: 1px solid var(--line); }
+.notice.warn { background: var(--warn-bg); color: var(--warn); } .notice.err { background: var(--err-bg); color: var(--err); }
+.notice b { font-weight: 750; }
+
+/* rozvržení */
+.view { display: none; } .view.on { display: grid; }
+.split { grid-template-columns: 340px minmax(0, 1fr); gap: 0; height: calc(100vh - 70px); }
+.side { border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; min-height: 0; }
+.side-top { padding: 12px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
+.search { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 12px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--line); }
+.search svg { width: 17px; height: 17px; color: var(--ink-3); }
+.search input { flex: 1; min-width: 0; border: 0; outline: none; background: none; }
+.side-list { flex: 1; overflow: auto; padding: 6px; }
+.it { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 10px; border-radius: 10px; }
+.it:hover { background: var(--surface-2); }
+.it[aria-current="true"] { background: var(--focus-bg); box-shadow: inset 3px 0 0 var(--focus); }
+.it .t { flex: 1; min-width: 0; } .it b { display: block; font-weight: 650; font-size: 15px; line-height: 1.25; } .it .s { display: block; font-size: 12.5px; color: var(--ink-2); }
+.it .k { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 12.5px; background: var(--kc); flex: none; }
+.k-C { --kc: var(--c); } .k-B { --kc: var(--b); } .k-R { --kc: var(--r); } .k-N { --kc: var(--n); } .k-E { --kc: var(--e); }
+.flag { font-size: 11.5px; font-weight: 750; padding: 2px 7px; border-radius: 7px; flex: none; }
+.flag.new { background: var(--ok-bg); color: var(--ok); } .flag.mod { background: var(--warn-bg); color: var(--warn); } .flag.bad { background: var(--err-bg); color: var(--err); }
+.main { overflow: auto; padding: 18px 22px 120px; }
+.btn { text-decoration: none; color: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 11px; font-weight: 650; background: var(--surface); border: 1px solid var(--line); white-space: nowrap; }
+.btn svg { width: 17px; height: 17px; }
+.btn.pri { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.btn.brand { background: var(--brand); color: #fff; border-color: var(--brand); }
+.btn.danger { color: var(--err); }
+.btn.sm { height: 32px; padding: 0 10px; font-size: 13.5px; border-radius: 9px; }
+.btn.full { width: 100%; }
+.empty { display: grid; place-items: center; height: 60vh; color: var(--ink-3); text-align: center; }
+
+/* editor */
+.ed-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.ed-head h2 { margin: 0; font-family: var(--font-d); font-size: 25px; font-weight: 750; flex: 1; min-width: 200px; }
+.saved { font-size: 13px; color: var(--ink-3); }
+.sec { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; box-shadow: var(--shadow); max-width: 980px; }
+.sec h3 { margin: 0 0 12px; font-size: 13px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
+.row { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.row + .row { margin-top: 12px; }
+.fld { display: grid; gap: 5px; min-width: 0; }
+.fld.wide { grid-column: 1 / -1; }
+.fld label { font-size: 13.5px; font-weight: 650; color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.fld label .req { color: var(--err); }
+.fld label .tool { margin-left: auto; }
+.fld input, .fld textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); outline: none; }
+.fld input:focus, .fld textarea:focus { border-color: var(--focus); background: var(--surface); }
+.fld textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+.fld .hint { font-size: 12.5px; color: var(--ink-3); }
+.fld.bad input, .fld.bad .seg { border-color: var(--err); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 600; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.seg.kat button[aria-pressed="true"] { background: var(--kc); border-color: var(--kc); color: #fff; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.ltag { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 4px; border-radius: 11px; border: 1.5px solid var(--kc); background: var(--surface); font-weight: 650; }
+.ltag .k { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 13px; background: var(--kc); }
+.ltag .x { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--ink-3); }
+.ltag .x:hover { background: var(--err-bg); color: var(--err); }
+.picker { position: relative; margin-top: 10px; max-width: 520px; }
+.picker .search { background: var(--surface); }
+.drop { position: absolute; left: 0; right: 0; top: 46px; z-index: 10; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 16px 40px -12px rgba(0,0,0,.3); max-height: 300px; overflow: auto; padding: 6px; }
+.maps { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.map { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface-2); }
+.map .img { aspect-ratio: 4 / 3; display: grid; place-items: center; background: var(--surface-2); position: relative; }
+.map img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.map .miss { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-size: 12.5px; color: var(--err); padding: 8px; font-weight: 650; }
+.map .bar2 { display: flex; align-items: center; gap: 4px; padding: 6px; }
+.map .n { flex: 1; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.map .bar2 button { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--ink-2); }
+.map .bar2 button:hover { background: var(--line); }
+.map .bar2 svg { width: 15px; height: 15px; }
+.add-map { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+.add-map input[type=text] { flex: 1; min-width: 180px; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
+.pik { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.pk { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface-2); text-align: center; font-size: 11.5px; line-height: 1.2; color: var(--ink-2); }
+.pk img { width: 52px; height: 52px; object-fit: contain; background: #fff; border-radius: 8px; padding: 2px; }
+.pk[aria-pressed="true"] { border-color: var(--focus); background: var(--focus-bg); color: var(--ink); box-shadow: 0 0 0 2px var(--focus); }
+.subh { font-size: 12.5px; font-weight: 750; color: var(--ink-3); margin: 12px 0 8px; }
+.subh:first-child { margin-top: 0; }
+
+/* publikovat */
+.pub { padding: 22px; display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; max-width: 1300px; }
+.pub .sec { margin: 0; max-width: none; }
+.pub .wide { grid-column: 1 / -1; }
+.chg { list-style: none; margin: 0; padding: 0; font-size: 14.5px; }
+.chg li { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); }
+.chg li:first-child { border-top: 0; }
+.steps { margin: 10px 0 0; padding-left: 20px; color: var(--ink-2); font-size: 14px; }
+.steps li { margin: 3px 0; }
+.ver { display: flex; gap: 10px; align-items: baseline; margin: 6px 0 12px; }
+.ver b { font-family: var(--font-d); font-size: 32px; }
+.log { max-height: 320px; overflow: auto; font-size: 13.5px; }
+.log div { padding: 6px 0; border-top: 1px solid var(--line); } .log div:first-child { border-top: 0; }
+.log .c { color: var(--ink-3); font-size: 12px; }
+.prob li { color: var(--err); }
+
+/* náhled */
+.dlg { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(8, 12, 18, .55); }
+.dlg.on { display: flex; }
+.dlg-box { width: min(900px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--bg); border-radius: 18px; }
+.dlg-top { position: sticky; top: 0; display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.pv { padding: 16px; display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pv h2 { grid-column: 1 / -1; margin: 0; font-family: var(--font-d); }
+.pv .f { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.pv .f.w { grid-column: 1 / -1; } .pv .f.r { background: var(--warn-bg); border-color: var(--warn); }
+.pv .l { font-size: 12px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.toast { position: fixed; left: 50%; bottom: 22px; z-index: 100; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 11px 18px; border-radius: 12px; background: var(--ink); color: var(--surface); font-weight: 650; transition: opacity .2s, transform .25s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.err { background: var(--err); color: #fff; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; height: auto; } .side { max-height: 40vh; } .row, .pub { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/><path d="M12 8v4M10 10h4"/></svg></div><div><h1>Operativní karty · správa</h1><small>úpravy dat pro aplikaci</small></div></div>
+    <nav class="tabs" role="tablist">
+      <button type="button" data-tab="obj" aria-selected="true">Objekty</button>
+      <button type="button" data-tab="cb" aria-selected="false">CBRNE látky</button>
+      <button type="button" data-tab="pub" aria-selected="false">Publikovat <span class="cnt" id="tab-cnt" hidden></span></button>
+    </nav>
+    <span class="grow"></span>
+    <label class="who" id="who-w">Správce <select id="who" aria-label="Kdo upravuje"></select></label>
+    <span class="status ok" id="status"><span class="dot"></span><span id="status-t">Beze změn</span></span>
+    <a class="btn" href="index.html" target="_blank" rel="noopener">Otevřít aplikaci</a>
+    <button type="button" class="icon-btn" id="b-theme" title="Světlý / tmavý režim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+  </div>
+  <div class="notice" id="notice" hidden></div>
+</header>
+
+<section class="view split on" id="v-obj">
+  <aside class="side">
+    <div class="side-top">
+      <button type="button" class="btn brand full" id="new-obj">+ Nový objekt</button>
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q-obj" type="search" placeholder="Hledat objekt…"></label>
+    </div>
+    <div class="side-list" id="l-obj"></div>
+  </aside>
+  <div class="main" id="e-obj"></div>
+</section>
+
+<section class="view split" id="v-cb">
+  <aside class="side">
+    <div class="side-top">
+      <button type="button" class="btn brand full" id="new-cb">+ Nová látka</button>
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q-cb" type="search" placeholder="Hledat látku…"></label>
+    </div>
+    <div class="side-list" id="l-cb"></div>
+  </aside>
+  <div class="main" id="e-cb"></div>
+</section>
+
+<section class="view" id="v-pub"><div class="pub" id="pub"></div></section>
+
+<div class="dlg" id="dlg"><div class="dlg-box"><div class="dlg-top"><b class="grow">Náhled karty v aplikaci</b><button type="button" class="btn pri" id="dlg-x">Zavřít</button></div><div id="dlg-b"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="cbrne.js"></script>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const norm = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const br2nl = (s) => String(s ?? '').replace(/\s*<br\s*\/?>\s*/gi, '\n');
+const rich = (h) => { const s = String(h ?? '').trim(); if (!s) return '<span style="color:var(--ink-3)">–</span>'; return /<[a-z]/i.test(s) ? s.replace(/\s*\n\s*/g, '<br>') : esc(s).replace(/\n/g, '<br>'); };
+const clone = (x) => JSON.parse(JSON.stringify(x));
+const uid = () => '_' + Math.random().toString(36).slice(2, 10);
+const now = () => new Date().toLocaleString('cs-CZ');
+const OKRESY = ['Děčín', 'Chomutov', 'Litoměřice', 'Louny', 'Most', 'Teplice', 'Ústí n. L.'];
+const KAT = { C: 'C - Chemické', B: 'B - Biologické', R: 'R - Radiologické', N: 'N - Nukleární', E: 'E - Výbušniny' };
+const katOf = (l) => (l.kategorie || 'C').trim().charAt(0).toUpperCase();
+const PIK = [
+  ['ghs01_explosive.png', 'Výbušné'], ['ghs02_flammable.png', 'Hořlavé'], ['ghs03_oxidizing.png', 'Oxidující'], ['ghs04_compressed.png', 'Plyn pod tlakem'], ['ghs05_corrosive.png', 'Žíravé'],
+  ['ghs06_toxic.png', 'Toxické'], ['ghs07_harmful.png', 'Dráždivé'], ['ghs08_health.png', 'Nebezp. pro zdraví'], ['ghs09_environment.png', 'Živ. prostředí'],
+  ['sym_radioactive.png', 'Ionizující záření'], ['sym_biohazard.png', 'Biologické riziko'], ['sym_toxic.png', 'Toxická látka'], ['sym_corrosive.png', 'Žíravina'], ['sym_flammable.png', 'Hořlavá látka'],
+  ['sym_explosive.png', 'Výbušná látka'], ['sym_high_voltage.png', 'Vysoké napětí'], ['sym_cryogenic.png', 'Kryogenní'], ['sym_laser.png', 'Laser'], ['sym_magnetic.png', 'Magnetické pole'], ['sym_non_ionizing.png', 'Neionizující záření'],
+];
+const PIK_OLD = { 'compressed_gas.jpg': 'ghs04_compressed.png', 'corrosive.jpg': 'ghs05_corrosive.png', 'toxic.jpg': 'ghs06_toxic.png', 'oxidizing.jpg': 'ghs03_oxidizing.png', 'ziravina.jpg': 'ghs05_corrosive.png', 'biohazard.jpg': 'sym_biohazard.png', 'radioactive.jpg': 'sym_radioactive.png', 'explosive.jpg': 'ghs01_explosive.png', 'harmful.jpg': 'ghs07_harmful.png' };
+const IC = {
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+};
+
+/* ---------- data: soubory = nasazená verze, rozpracované = localStorage ---------- */
+const FILE_META = typeof OPKA_META !== 'undefined' ? OPKA_META : { verze: 0 };
+const FILE_F = typeof firmy !== 'undefined' ? clone(firmy) : [];
+const FILE_C = typeof cbrneData !== 'undefined' ? clone(cbrneData) : [];
+const FILE_S = typeof OPKA_SPRAVCI !== 'undefined' ? clone(OPKA_SPRAVCI) : [];
+let S = [];   // seznam správců (sdílený přes data.js)
+// ověření: { kdo, datum (RRRR-MM-DD), pozn } – starší data měla jen text
+const ov = (o) => (o && typeof o === 'object') ? { kdo: o.kdo || '', datum: o.datum || '', pozn: o.pozn || '' } : { kdo: '', datum: '', pozn: String(o || '') };
+const normF = (f) => JSON.stringify(pub({ ...f, latky: f.latky || [], overeno: ov(f.overeno) }));
+let F = [], C = [], base = FILE_META.verze || 0, exported = false;
+function prep() {
+  F.forEach((f) => { f._id = f._id || uid(); f.latky = f.latky || []; f.overeno = ov(f.overeno); });
+  C.forEach((l) => { l._id = l._id || uid(); l.piktogramy = [...new Set((l.piktogramy || []).map((p) => PIK_OLD[p] || p))]; if (!l.id) l.id = slug(l.nazev); });
+}
+function fromFiles() { F = clone(FILE_F); C = clone(FILE_C); S = clone(FILE_S); base = FILE_META.verze || 0; exported = false; prep(); }
+function slug(s) { let b = norm(s).replace(/\(.*?\)/g, '').replace(/[^a-z0-9]+/g, '').slice(0, 14) || 'latka'; let id = b, n = 2; while (C.some((l) => l.id === id)) id = b + n++; return id; }
+let saveT = null;
+function changed() { exported = false; clearTimeout(saveT); saveT = setTimeout(saveDraft, 300); renderStatus(); }
+function saveDraft() { try { localStorage.setItem('opka_draft2', JSON.stringify({ F, C, S, base, cas: now(), exported })); } catch (e) { toast('Nepodařilo se uložit rozpracované', true); } $('saved') && ($('saved').textContent = 'Uloženo automaticky ' + new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })); }
+function logIt(t) { try { const L = JSON.parse(localStorage.getItem('opka_log2') || '[]'); L.unshift({ t, c: now(), s: spravce() }); L.length = Math.min(L.length, 100); localStorage.setItem('opka_log2', JSON.stringify(L)); } catch (e) {} }
+const spravce = () => { try { return localStorage.getItem('opka_spravce') || ''; } catch (e) { return ''; } };
+
+/* ---------- rozdíl proti souborům ---------- */
+const pub = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => !k.startsWith('_')));
+const strip = (o) => JSON.stringify(pub(o));
+function diff() {
+  const fF = new Map(FILE_F.map((f) => [f.nazev, normF(f)]));
+  const dF = new Map(F.map((f) => [f.nazev, normF(f)]));
+  const fC = new Map(FILE_C.map((l) => [l.id || slug(l.nazev), JSON.stringify({ ...l, piktogramy: [...new Set((l.piktogramy || []).map((p) => PIK_OLD[p] || p))] })]));
+  const dC = new Map(C.map((l) => [l.id, strip(l)]));
+  const res = { fAdd: [], fMod: [], fDel: [], cAdd: [], cMod: [], cDel: [] };
+  dF.forEach((v, k) => { if (!fF.has(k)) res.fAdd.push(k); else if (fF.get(k) !== v) res.fMod.push(k); });
+  fF.forEach((v, k) => { if (!dF.has(k)) res.fDel.push(k); });
+  dC.forEach((v, k) => { const n = C.find((l) => l.id === k).nazev; if (!fC.has(k)) res.cAdd.push(n); else if (fC.get(k) !== v) res.cMod.push(n); });
+  fC.forEach((v, k) => { if (!dC.has(k)) res.cDel.push((FILE_C.find((l) => (l.id || slug(l.nazev)) === k) || {}).nazev || k); });
+  res.spr = JSON.stringify(S) !== JSON.stringify(FILE_S);
+  res.n = Object.values(res).reduce((a, x) => a + (Array.isArray(x) ? x.length : 0), 0) + (res.spr ? 1 : 0);
+  return res;
+}
+function stateOf(f) { const ff = FILE_F.find((x) => x.nazev === f.nazev); if (!ff) return 'new'; return normF(ff) !== normF(f) ? 'mod' : ''; }
+function problems(f) { const p = []; if (!f.nazev.trim()) p.push('název'); if (!String(f.adresa || '').trim()) p.push('adresa'); if (!f.okres) p.push('okres'); return p; }
+
+/* ---------- stav nahoře ---------- */
+function renderStatus() {
+  const d = diff(), st = $('status');
+  if (exported) { st.className = 'status warn'; $('status-t').textContent = `Export verze ${base} čeká na nahrání`; }
+  else if (d.n) { st.className = 'status warn'; $('status-t').textContent = `Nepublikované změny: ${d.n}`; }
+  else { st.className = 'status ok'; $('status-t').textContent = `Shodné s verzí ${FILE_META.verze || 0}`; }
+  $('tab-cnt').hidden = !d.n; $('tab-cnt').textContent = d.n;
+}
+
+/* ---------- přepínání ---------- */
+let tab = 'obj', curF = null, curC = null;
+function setTab(t) { tab = t; document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t)); document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === 'v-' + t)); if (t === 'pub') renderPub(); }
+document.querySelector('.tabs').onclick = (e) => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); };
+
+/* ---------- OBJEKTY ---------- */
+function renderFList() {
+  const q = norm($('q-obj').value);
+  const xs = F.filter((f) => !q || norm(f.nazev + ' ' + f.okres + ' ' + f.adresa).includes(q)).sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
+  $('l-obj').innerHTML = xs.map((f) => { const s = stateOf(f), p = problems(f); return `<button type="button" class="it" data-f="${f._id}" aria-current="${curF === f._id}"><span class="t"><b>${esc(f.nazev || 'Bez názvu')}</b><span class="s">${esc(f.okres || '–')}</span></span>${p.length ? '<span class="flag bad">chybí údaje</span>' : s === 'new' ? '<span class="flag new">nový</span>' : s === 'mod' ? '<span class="flag mod">změněno</span>' : ''}</button>`; }).join('') || '<p style="padding:12px;color:var(--ink-3)">Nic nenalezeno.</p>';
+}
+const getF = () => F.find((f) => f._id === curF);
+const fld = (k, label, val, opts = {}) => { const id = `i-${opts.p || 'f'}-${k}`; return `<div class="fld ${opts.wide ? 'wide' : ''} ${opts.bad ? 'bad' : ''}"><label for="${id}">${label}${opts.req ? ' <span class="req">*</span>' : ''}${opts.ta ? `<button type="button" class="btn sm tool" data-bold="${id}" title="Označený text tučně"><b>B</b>&nbsp;tučně</button>` : ''}</label>${opts.ta ? `<textarea id="${id}" data-k="${k}" rows="${opts.rows || 3}" placeholder="${esc(opts.ph || '')}">${esc(br2nl(val))}</textarea>` : `<input id="${id}" type="text" data-k="${k}" value="${esc(val)}" placeholder="${esc(opts.ph || '')}">`}${opts.hint ? `<span class="hint">${opts.hint}</span>` : ''}</div>`; };
+function renderFEd() {
+  const f = getF();
+  if (!f) { $('e-obj').innerHTML = '<div class="empty"><div><b>Vyber objekt vlevo</b><br>nebo založ nový.</div></div>'; return; }
+  const p = problems(f), m = [].concat(f.mapa || []).filter(Boolean);
+  $('e-obj').innerHTML = `
+    <div class="ed-head"><h2>${esc(f.nazev || 'Nový objekt')}</h2><span class="saved" id="saved">Změny se ukládají automaticky</span>
+      <button type="button" class="btn" id="f-prev">${IC.eye}Náhled</button><button type="button" class="btn" id="f-dup">${IC.copy}Duplikovat</button><button type="button" class="btn danger" id="f-del">${IC.trash}Smazat</button></div>
+    <div class="sec"><h3>Základní údaje</h3>
+      <div class="row">${fld('nazev', 'Název firmy / objektu', f.nazev, { req: 1, wide: 1, bad: p.includes('název') })}</div>
+      <div class="row">${fld('adresa', 'Adresa', f.adresa, { req: 1, bad: p.includes('adresa'), ph: 'ulice č., PSČ obec' })}
+        <div class="fld ${p.includes('okres') ? 'bad' : ''}"><label>Okres <span class="req">*</span></label><div class="seg" id="okres">${OKRESY.map((o) => `<button type="button" data-okres="${o}" aria-pressed="${f.okres === o}">${o}</button>`).join('')}</div></div></div>
+    </div>
+    <div class="sec"><h3>Kontakt a provoz</h3>
+      <div class="row">${fld('kontakt', 'Kontakt', f.kontakt, { ta: 1, ph: 'Vrátnice: 474 610 111' , hint: 'Telefonní čísla budou v aplikaci klikatelná.' })}${fld('doba', 'Provozní doba', f.doba, { ta: 1, ph: '24/7 nebo Po–Pá 6:00–15:00' })}</div>
+      <div class="row">${fld('zamestnanci', 'Počet zaměstnanců', f.zamestnanci, { ph: 'např. 450 (směna cca 150)' })}</div>
+    </div>
+    <div class="sec"><h3>Popis objektu</h3>
+      <div class="row">${fld('charakter', 'Charakter objektu', f.charakter, { ta: 1, wide: 1, rows: 4 })}</div>
+      <div class="row">${fld('trasa', 'Přístupová trasa', f.trasa, { ta: 1, wide: 1 })}</div>
+      <div class="row">${fld('rizika', 'Rizika', f.rizika, { ta: 1, wide: 1, hint: 'Každý řádek = samostatný řádek v kartě. Konkrétní látky přidej níže – v aplikaci půjdou rozkliknout.' })}</div>
+    </div>
+    <div class="sec"><h3>CBRNE látky v objektu</h3>
+      <div class="tags" id="f-lat">${(f.latky || []).map((id) => { const l = C.find((x) => x.id === id); if (!l) return `<span class="ltag k-C"><span class="k">?</span>Neznámá látka (${esc(id)})<button type="button" class="x" data-rmlat="${esc(id)}">${IC.x}</button></span>`; const k = katOf(l); return `<span class="ltag k-${k}"><span class="k">${k}</span>${esc(l.nazev)}<button type="button" class="x" data-rmlat="${esc(id)}" title="Odebrat">${IC.x}</button></span>`; }).join('') || '<span style="color:var(--ink-3);font-size:14px">Zatím žádná látka.</span>'}</div>
+      <div class="picker"><label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lat-q" type="search" placeholder="Přidat látku z databáze – piš název nebo UN…" autocomplete="off"></label><div class="drop" id="lat-drop" hidden></div></div>
+    </div>
+    <div class="sec"><h3>Mapové podklady</h3>
+      <div class="maps">${m.map((x, i) => `<div class="map"><div class="img"><img src="mapy/${encodeURI(x)}" alt="" onerror="this.remove();this.parentNode.insertAdjacentHTML('beforeend','<span class=miss>Soubor není ve složce mapy/</span>')"></div><div class="bar2"><span class="n" title="${esc(x)}">${i + 1}. ${esc(x)}</span><button type="button" data-mv="${i}" data-d="-1" title="Dřív">${IC.up}</button><button type="button" data-mv="${i}" data-d="1" title="Později">${IC.down}</button><button type="button" data-rm="${i}" title="Odebrat">${IC.x}</button></div></div>`).join('')}</div>
+      <div class="add-map"><label class="btn">Vybrat soubory…<input type="file" id="map-pick" accept="image/*" multiple hidden></label><input type="text" id="map-name" placeholder="nebo napiš název souboru, např. orlen.jpeg"><button type="button" class="btn" id="map-add">Přidat</button></div>
+      <p class="hint" style="font-size:12.5px;color:var(--ink-3);margin:8px 0 0">Obrázky je potřeba nahrát na server do složky <b>mapy/</b> se stejným názvem. První obrázek se v aplikaci zobrazuje jako první.</p>
+    </div>
+    <div class="sec"><h3>Ověření údajů</h3><div class="row">
+      <div class="fld"><label for="ov-kdo">Ověřil</label><select id="ov-kdo" data-ov="kdo"><option value="">— vyber správce —</option>${S.map((n) => `<option ${f.overeno.kdo === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}${f.overeno.kdo && !S.includes(f.overeno.kdo) ? `<option selected>${esc(f.overeno.kdo)}</option>` : ''}</select></div>
+      <div class="fld"><label for="ov-dat">Datum ověření</label><div class="date-row"><input id="ov-dat" type="date" data-ov="datum" value="${esc(f.overeno.datum)}"><button type="button" class="btn" id="ov-dnes">Dnes</button></div></div></div>
+      <div class="row"><div class="fld wide"><label for="ov-pozn">Poznámka</label><input id="ov-pozn" type="text" data-ov="pozn" value="${esc(f.overeno.pozn)}" placeholder="např. telefonicky s vrátnicí, aktualizován plánek"></div></div>
+      <p class="hint" style="font-size:12.5px;color:var(--ink-3);margin:8px 0 0">V aplikaci se zobrazí drobně pod kartou: „Údaje ověřeny 11. 10. 2026 · jméno · poznámka“.</p></div>`;
+}
+$('l-obj').onclick = (e) => { const b = e.target.closest('[data-f]'); if (!b) return; curF = b.dataset.f; renderFList(); renderFEd(); $('e-obj').scrollTop = 0; };
+$('q-obj').oninput = renderFList;
+$('new-obj').onclick = () => { const f = { _id: uid(), nazev: 'Nový objekt', adresa: '', okres: '', kontakt: '', zamestnanci: '', doba: '', charakter: '', trasa: '', rizika: '', mapa: '', latky: [], overeno: { kdo: '', datum: '', pozn: '' } }; F.push(f); curF = f._id; logIt('Nový objekt'); changed(); renderFList(); renderFEd(); setTimeout(() => { const i = $('i-f-nazev'); i.focus(); i.select(); }, 30); };
+$('e-obj').addEventListener('input', (e) => {
+  const t = e.target, f = getF(); if (!f) return;
+  if (t.dataset.k) { f[t.dataset.k] = t.value; changed(); if (t.dataset.k === 'nazev') { document.querySelector('#e-obj h2').textContent = t.value || 'Nový objekt'; } renderFList(); }
+  if (t.id === 'lat-q') renderLatDrop();
+  if (t.dataset.ov) { f.overeno[t.dataset.ov] = t.value; changed(); renderFList(); }
+});
+$('e-obj').addEventListener('focusout', (e) => { if (e.target.dataset.k === 'nazev') { const f = getF(); if (f && F.some((x) => x !== f && x.nazev.trim().toLowerCase() === f.nazev.trim().toLowerCase())) toast('Objekt s tímto názvem už existuje', true); } });
+$('e-obj').addEventListener('click', (e) => {
+  const f = getF(); if (!f) return; let b;
+  if ((b = e.target.closest('[data-okres]'))) { f.okres = b.dataset.okres; changed(); renderFList(); renderFEd(); return; }
+  if ((b = e.target.closest('[data-bold]'))) { bold($(b.dataset.bold)); return; }
+  if ((b = e.target.closest('[data-rmlat]'))) { f.latky = f.latky.filter((x) => x !== b.dataset.rmlat); changed(); renderFList(); renderFEd(); return; }
+  if ((b = e.target.closest('[data-addlat]'))) { if (!f.latky.includes(b.dataset.addlat)) f.latky.push(b.dataset.addlat); changed(); renderFList(); renderFEd(); setTimeout(() => $('lat-q').focus(), 20); return; }
+  if ((b = e.target.closest('[data-mv]'))) { const m = [].concat(f.mapa || []).filter(Boolean), i = +b.dataset.mv, j = i + +b.dataset.d; if (j < 0 || j >= m.length) return; [m[i], m[j]] = [m[j], m[i]]; setMaps(f, m); return; }
+  if ((b = e.target.closest('[data-rm]'))) { const m = [].concat(f.mapa || []).filter(Boolean); m.splice(+b.dataset.rm, 1); setMaps(f, m); return; }
+  if (e.target.closest('#map-add')) { const v = $('map-name').value.trim(); if (!v) return; const m = [].concat(f.mapa || []).filter(Boolean); if (!m.includes(v)) m.push(v); setMaps(f, m); return; }
+  if (e.target.closest('#f-del')) { if (!confirm(`Smazat objekt „${f.nazev}“?`)) return; F = F.filter((x) => x !== f); logIt('Smazán objekt: ' + f.nazev); curF = null; changed(); renderFList(); renderFEd(); return; }
+  if (e.target.closest('#f-dup')) { const c = clone(f); c._id = uid(); c.nazev = f.nazev + ' (kopie)'; F.push(c); curF = c._id; logIt('Duplikován objekt: ' + f.nazev); changed(); renderFList(); renderFEd(); return; }
+  if (e.target.closest('#ov-dnes')) { const d = new Date(), v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; f.overeno.datum = v; $('ov-dat').value = v; if (!f.overeno.kdo && spravce()) { f.overeno.kdo = spravce(); $('ov-kdo').value = spravce(); } changed(); renderFList(); return; }
+  if (e.target.closest('#f-prev')) { preview(f); return; }
+});
+$('e-obj').addEventListener('change', (e) => { const t = e.target; if (t.dataset && t.dataset.ov) { const f = getF(); f.overeno[t.dataset.ov] = t.value; changed(); renderFList(); return; } if (e.target.id === 'map-pick') { const f = getF(), m = [].concat(f.mapa || []).filter(Boolean); [...e.target.files].forEach((x) => { if (!m.includes(x.name)) m.push(x.name); }); setMaps(f, m); toast('Přidáno – nezapomeň soubory nahrát do složky mapy/'); } });
+$('e-obj').addEventListener('keydown', (e) => { if (e.target.id === 'map-name' && e.key === 'Enter') { e.preventDefault(); $('map-add').click(); } if (e.target.id === 'lat-q' && e.key === 'Enter') { e.preventDefault(); const b = document.querySelector('#lat-drop [data-addlat]'); if (b) b.click(); } });
+document.addEventListener('click', (e) => { if (!e.target.closest('.picker')) { const d = $('lat-drop'); if (d) d.hidden = true; } });
+function setMaps(f, m) { f.mapa = m.length === 0 ? '' : m.length === 1 ? m[0] : m; changed(); renderFList(); renderFEd(); }
+function renderLatDrop() {
+  const f = getF(), q = norm($('lat-q').value), d = $('lat-drop');
+  const xs = C.filter((l) => !f.latky.includes(l.id) && (!q || norm(l.nazev + ' ' + l.identifikace).includes(q))).sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs')).slice(0, 30);
+  d.hidden = false;
+  d.innerHTML = xs.map((l) => { const k = katOf(l); return `<button type="button" class="it k-${k}" data-addlat="${esc(l.id)}"><span class="k">${k}</span><span class="t"><b>${esc(l.nazev)}</b><span class="s">${esc(l.identifikace || '')}</span></span></button>`; }).join('') || '<p style="padding:10px;color:var(--ink-3);margin:0">Nic nenalezeno – látku můžeš založit v záložce CBRNE látky.</p>';
+}
+$('e-obj').addEventListener('focusin', (e) => { if (e.target.id === 'lat-q') renderLatDrop(); });
+function bold(ta) { if (!ta) return; const a = ta.selectionStart, b = ta.selectionEnd; if (a === b) { toast('Nejdřív označ text'); return; } ta.setRangeText('<b>' + ta.value.slice(a, b) + '</b>', a, b, 'end'); ta.dispatchEvent(new Event('input', { bubbles: true })); ta.focus(); }
+
+function ovText(o) { o = ov(o); const d = o.datum ? o.datum.split('-').reverse().map((x) => String(+x)).join('. ') : ''; return [d, o.kdo, o.pozn].filter(Boolean).join(' · '); }
+/* náhled karty */
+function preview(f) {
+  const m = [].concat(f.mapa || []).filter(Boolean), lat = (f.latky || []).map((id) => C.find((l) => l.id === id)).filter(Boolean);
+  $('dlg-b').innerHTML = `<div class="pv"><h2>${esc(f.nazev)}</h2>
+    <div class="f"><div class="l">Adresa</div>${rich(f.adresa)}<br><small style="color:var(--ink-3)">okres ${esc(f.okres || '–')}</small></div><div class="f"><div class="l">Kontakt</div>${rich(f.kontakt)}</div>
+    <div class="f"><div class="l">Provozní doba</div>${rich(f.doba)}</div><div class="f"><div class="l">Počet zaměstnanců</div>${rich(f.zamestnanci)}</div>
+    <div class="f w"><div class="l">Charakter objektu</div>${rich(f.charakter)}</div><div class="f w"><div class="l">Přístupová trasa</div>${rich(f.trasa)}</div>
+    <div class="f w r"><div class="l">Rizika</div>${rich(f.rizika)}${lat.length ? '<div style="margin-top:8px">' + lat.map((l) => `<span class="ltag k-${katOf(l)}" style="margin:4px 6px 0 0;padding-right:12px"><span class="k">${katOf(l)}</span>${esc(l.nazev)}</span>`).join('') + '</div>' : ''}</div>
+    <div class="f w"><div class="l">Mapové podklady</div>${m.length ? m.map(esc).join(', ') : '–'}</div>${ovText(f.overeno) ? `<div class="f w"><div class="l">Údaje ověřeny</div>${esc(ovText(f.overeno))}</div>` : ''}</div>`;
+  $('dlg').classList.add('on');
+}
+$('dlg-x').onclick = () => $('dlg').classList.remove('on');
+$('dlg').onclick = (e) => { if (e.target === $('dlg')) $('dlg').classList.remove('on'); };
+
+/* ---------- CBRNE ---------- */
+function renderCList() {
+  const q = norm($('q-cb').value);
+  const xs = C.filter((l) => !q || norm(l.nazev + ' ' + l.identifikace).includes(q)).sort((a, b) => a.nazev.localeCompare(b.nazev, 'cs'));
+  $('l-cb').innerHTML = xs.map((l) => { const k = katOf(l), fl = FILE_C.find((x) => (x.id || '') === l.id); const st = !fl ? 'new' : (JSON.stringify({ ...fl, piktogramy: [...new Set((fl.piktogramy || []).map((p) => PIK_OLD[p] || p))] }) !== strip(l) ? 'mod' : ''); return `<button type="button" class="it k-${k}" data-c="${l._id}" aria-current="${curC === l._id}"><span class="k">${k}</span><span class="t"><b>${esc(l.nazev || 'Bez názvu')}</b><span class="s">${esc(l.identifikace || '')}</span></span>${!l.nazev.trim() ? '<span class="flag bad">chybí název</span>' : st === 'new' ? '<span class="flag new">nová</span>' : st === 'mod' ? '<span class="flag mod">změněno</span>' : ''}</button>`; }).join('');
+}
+const getC = () => C.find((l) => l._id === curC);
+function renderCEd() {
+  const l = getC();
+  if (!l) { $('e-cb').innerHTML = '<div class="empty"><div><b>Vyber látku vlevo</b><br>nebo založ novou.</div></div>'; return; }
+  const k = katOf(l), used = F.filter((f) => (f.latky || []).includes(l.id));
+  const tiles = (arr) => arr.map(([p, n]) => `<button type="button" class="pk" data-pk="${p}" aria-pressed="${(l.piktogramy || []).includes(p)}"><img src="img/${p}" alt="">${n}</button>`).join('');
+  $('e-cb').innerHTML = `
+    <div class="ed-head"><h2>${esc(l.nazev || 'Nová látka')}</h2><span class="saved" id="saved">Změny se ukládají automaticky</span><button type="button" class="btn" id="c-dup">${IC.copy}Duplikovat</button><button type="button" class="btn danger" id="c-del">${IC.trash}Smazat</button></div>
+    <div class="sec"><h3>Základní údaje</h3>
+      <div class="row">${fld('nazev', 'Název látky', l.nazev, { p: 'c',  req: 1, bad: !l.nazev.trim() })}${fld('identifikace', 'Identifikace', l.identifikace, { p: 'c',  ph: 'vzorec / UN / CAS / latinský název' })}</div>
+      <div class="row"><div class="fld wide"><label>Kategorie <span class="req">*</span></label><div class="seg kat">${Object.entries(KAT).map(([kk, n]) => `<button type="button" class="k-${kk}" data-kat="${kk}" aria-pressed="${k === kk}">${n}</button>`).join('')}</div></div></div>
+      <p class="hint" style="font-size:12.5px;color:var(--ink-3);margin:10px 0 0">Kód pro propojení s objekty: <b>${esc(l.id)}</b> (vzniká automaticky, nemění se)</p>
+    </div>
+    <div class="sec"><h3>Piktogramy</h3><div class="subh">GHS</div><div class="pik">${tiles(PIK.slice(0, 9))}</div><div class="subh">Výstražné symboly ISO 7010</div><div class="pik">${tiles(PIK.slice(9))}</div></div>
+    <div class="sec"><h3>Informace pro posádku</h3>
+      <div class="row">${fld('vlastnosti', 'Vlastnosti', l.vlastnosti, { p: 'c',  ta: 1, wide: 1 })}</div>
+      <div class="row">${fld('oopp', 'OOPP / dekontaminace', l.oopp, { p: 'c',  ta: 1, wide: 1 })}</div>
+      <div class="row">${fld('klinika', 'Klinické projevy', l.klinika, { p: 'c',  ta: 1, wide: 1 })}</div>
+      <div class="row">${fld('lecba', 'První pomoc / léčba', l.lecba, { p: 'c',  ta: 1, wide: 1, rows: 4 })}</div>
+      <div class="row">${fld('cave', 'CAVE', l.cave, { p: 'c',  ta: 1, wide: 1 })}</div>
+    </div>
+    <div class="sec"><h3>Výskyt v objektech</h3>${used.length ? `<div class="tags">${used.map((f) => `<button type="button" class="btn sm" data-gof="${f._id}">${esc(f.nazev)}</button>`).join('')}</div>` : '<span style="color:var(--ink-3);font-size:14px">Žádný objekt tuto látku nemá. Přiřazuje se v kartě objektu.</span>'}</div>`;
+}
+$('l-cb').onclick = (e) => { const b = e.target.closest('[data-c]'); if (!b) return; curC = b.dataset.c; renderCList(); renderCEd(); $('e-cb').scrollTop = 0; };
+$('q-cb').oninput = renderCList;
+$('new-cb').onclick = () => { const n = 'Nová látka'; const l = { _id: uid(), id: '', kategorie: KAT.C, nazev: n, identifikace: '', piktogramy: [], vlastnosti: '', oopp: '', klinika: '', lecba: '', cave: '' }; l._fresh = 1; C.push(l); l.id = slug(n); curC = l._id; logIt('Nová látka'); changed(); renderCList(); renderCEd(); setTimeout(() => { const i = $('i-c-nazev'); i.focus(); i.select(); }, 30); };
+$('e-cb').addEventListener('input', (e) => { const t = e.target, l = getC(); if (!l || !t.dataset.k) return; l[t.dataset.k] = t.value; if (t.dataset.k === 'nazev' && l._fresh && !F.some((f) => (f.latky || []).includes(l.id))) { l.id = ''; l.id = slug(t.value); const h = document.querySelector('#e-cb .sec .hint b'); if (h) h.textContent = l.id; } changed(); if (t.dataset.k === 'nazev') document.querySelector('#e-cb h2').textContent = t.value || 'Nová látka'; renderCList(); });
+$('e-cb').addEventListener('click', (e) => {
+  const l = getC(); if (!l) return; let b;
+  if ((b = e.target.closest('[data-kat]'))) { l.kategorie = KAT[b.dataset.kat]; changed(); renderCList(); renderCEd(); return; }
+  if ((b = e.target.closest('[data-pk]'))) { const p = b.dataset.pk, a = l.piktogramy || (l.piktogramy = []); const i = a.indexOf(p); if (i >= 0) a.splice(i, 1); else a.push(p); b.setAttribute('aria-pressed', i < 0); changed(); renderCList(); return; }
+  if ((b = e.target.closest('[data-bold]'))) { bold($(b.dataset.bold)); return; }
+  if ((b = e.target.closest('[data-gof]'))) { curF = b.dataset.gof; setTab('obj'); renderFList(); renderFEd(); return; }
+  if (e.target.closest('#c-del')) { const used = F.filter((f) => (f.latky || []).includes(l.id)); if (!confirm(`Smazat látku „${l.nazev}“?${used.length ? `\n\nJe přiřazená k ${used.length} objektům – odebere se i z nich.` : ''}`)) return; used.forEach((f) => { f.latky = f.latky.filter((x) => x !== l.id); }); C = C.filter((x) => x !== l); logIt('Smazána látka: ' + l.nazev); curC = null; changed(); renderCList(); renderCEd(); renderFList(); return; }
+  if (e.target.closest('#c-dup')) { const c = clone(l); c._id = uid(); c.nazev = l.nazev + ' (kopie)'; c.id = slug(c.nazev); C.push(c); curC = c._id; logIt('Duplikována látka: ' + l.nazev); changed(); renderCList(); renderCEd(); return; }
+});
+
+/* ---------- PUBLIKOVAT ---------- */
+function renderPub() {
+  const d = diff(), probs = F.filter((f) => problems(f).length).map((f) => `${f.nazev || 'Bez názvu'} – chybí ${problems(f).join(', ')}`).concat(C.filter((l) => !l.nazev.trim()).map(() => 'Látka bez názvu'));
+  const dup = F.map((f) => f.nazev.trim().toLowerCase()).filter((n, i, a) => a.indexOf(n) !== i); if (dup.length) probs.push('Duplicitní názvy objektů: ' + [...new Set(dup)].join(', '));
+  const li = (arr, cls, t) => arr.map((x) => `<li><span class="flag ${cls}">${t}</span>${esc(x)}</li>`).join('');
+  let log = []; try { log = JSON.parse(localStorage.getItem('opka_log2') || '[]'); } catch (e) {}
+  $('pub').innerHTML = `
+    <div class="sec"><h3>Změny proti souborům na serveru (verze ${FILE_META.verze || 0})</h3>
+      ${d.n ? `<ul class="chg">${li(d.fAdd, 'new', 'nový objekt')}${li(d.fMod, 'mod', 'změna objektu')}${li(d.fDel, 'bad', 'smazán objekt')}${li(d.cAdd, 'new', 'nová látka')}${li(d.cMod, 'mod', 'změna látky')}${li(d.cDel, 'bad', 'smazána látka')}${d.spr ? '<li><span class="flag mod">správci</span>upravený seznam správců</li>' : ''}</ul>` : '<p style="margin:0;color:var(--ink-3)">Žádné změny – data odpovídají souborům.</p>'}
+      ${d.n ? '<button type="button" class="btn danger sm" id="discard" style="margin-top:12px">Zahodit všechny změny</button>' : ''}</div>
+    <div class="sec"><h3>Publikovat</h3>
+      ${probs.length ? `<p style="margin:0 0 6px;font-weight:650;color:var(--err)">Nejdřív oprav:</p><ul class="steps prob">${probs.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
+      <p style="margin:6px 0 0">Publikuje: ${spravce() ? `<b>${esc(spravce())}</b>` : '<b style="color:var(--err)">nevybráno – vyber správce nahoře</b>'}</p>
+      <div class="ver"><span style="color:var(--ink-2)">Nová verze dat:</span><b>${base + 1}</b></div>
+      <button type="button" class="btn brand" id="export" ${probs.length ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}>Stáhnout data.js + cbrne.js</button>
+      <ol class="steps"><li>Stáhni oba soubory.</li><li>Nahraj je na server do složky aplikace (přepiš původní).</li><li>Nové obrázky plánků nahraj do složky <b>mapy/</b>.</li><li>Otevři aplikaci a v patičce zkontroluj číslo verze.</li></ol></div>
+    <div class="sec"><h3>Seznam správců</h3><p style="margin:0 0 10px;color:var(--ink-2);font-size:14px">Sdílí se s daty – po publikování ho uvidí všichni správci.</p>
+      <ul class="sprl">${S.map((n) => `<li><span>${esc(n)}</span><button type="button" class="btn sm danger" data-rmspr="${esc(n)}">Odebrat</button></li>`).join('') || '<li style="color:var(--ink-3)">Zatím nikdo.</li>'}</ul>
+      <div class="date-row"><input id="spr-new" type="text" placeholder="jméno a příjmení" style="height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)"><button type="button" class="btn" id="spr-add">Přidat</button></div></div>
+    <div class="sec"><h3>Načíst data</h3><p style="margin:0 0 10px;color:var(--ink-2);font-size:14px">Načte <b>data.js</b> a/nebo <b>cbrne.js</b> (např. od jiného správce) do editoru jako rozpracované změny.</p><label class="btn">Vybrat soubory…<input type="file" id="imp" accept=".js" multiple hidden></label></div>
+    <div class="sec"><h3>Historie úprav (tento počítač)</h3><div class="log">${log.map((x) => `<div>${esc(x.t)}<br><span class="c">${esc(x.c)}${x.s ? ' · ' + esc(x.s) : ''}</span></div>`).join('') || '<span style="color:var(--ink-3)">Zatím nic.</span>'}</div></div>`;
+}
+$('pub').addEventListener('keydown', (e) => { if (e.target.id === 'spr-new' && e.key === 'Enter') { e.preventDefault(); $('spr-add').click(); } });
+$('pub').addEventListener('click', (e) => {
+  if (e.target.closest('#discard')) { if (!confirm('Zahodit všechny nepublikované změny a vrátit se k souborům?')) return; localStorage.removeItem('opka_draft2'); fromFiles(); curF = curC = null; logIt('Zahozeny změny'); renderAll(); renderPub(); $('notice').hidden = true; return; }
+  if (e.target.closest('#export')) exportFiles();
+  if (e.target.closest('#spr-add')) { const v = $('spr-new').value.trim(); if (!v) return; if (S.includes(v)) { toast('Už je v seznamu', true); return; } S.push(v); S.sort((a, b) => a.localeCompare(b, 'cs')); logIt('Přidán správce: ' + v); changed(); renderWho(); renderPub(); return; }
+  const r = e.target.closest('[data-rmspr]'); if (r) { const v = r.dataset.rmspr; if (!confirm(`Odebrat „${v}“ ze seznamu správců?`)) return; S = S.filter((x) => x !== v); logIt('Odebrán správce: ' + v); changed(); renderWho(); renderPub(); }
+});
+$('pub').addEventListener('change', (e) => { if (e.target.id === 'imp') importFiles(e.target.files); });
+function dl(name, txt) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/javascript' })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+function exportFiles() {
+  const s = spravce(); if (!s) { toast('Nahoře vyber, kdo publikuje', true); $('who').focus(); return; }
+  const meta = { verze: base + 1, datum: now(), spravce: s };
+  const head = (w) => `// OPKA – ${w}. Verze ${meta.verze}, ${meta.datum}, ${meta.spravce}\n`;
+  const fOut = F.map(pub), cOut = C.map(pub);
+  dl('data.js', head('data') + 'const OPKA_META = ' + JSON.stringify(meta, null, 4) + ';\nconst OPKA_SPRAVCI = ' + JSON.stringify(S, null, 4) + ';\nconst firmy = ' + JSON.stringify(fOut, null, 4) + ';\n');
+  setTimeout(() => dl('cbrne.js', head('CBRNE') + 'const cbrneData = ' + JSON.stringify(cOut, null, 4) + ';\n'), 400);
+  base = meta.verze; exported = true; saveDraft(); logIt(`Export verze ${meta.verze}`); renderStatus(); renderPub();
+  toast(`Verze ${meta.verze} stažena – nahraj soubory na server`);
+}
+function importFiles(files) {
+  [...files].forEach((file) => { const r = new FileReader(); r.onload = () => {
+    try {
+      const g = {}; new Function('g', String(r.result).replace(/^const (OPKA_META|OPKA_SPRAVCI|firmy|cbrneData)\b/gm, 'g.$1'))(g);
+      if (g.firmy) { F = clone(g.firmy); if (g.OPKA_META) base = g.OPKA_META.verze || base; if (g.OPKA_SPRAVCI) S = clone(g.OPKA_SPRAVCI); }
+      if (g.cbrneData) C = clone(g.cbrneData);
+      if (!g.firmy && !g.cbrneData) throw new Error('soubor neobsahuje data');
+      prep(); curF = curC = null; changed(); renderAll(); renderPub(); logIt('Načten soubor ' + file.name); toast('Načteno: ' + file.name);
+    } catch (er) { toast('Chyba souboru ' + file.name + ': ' + er.message, true); }
+  }; r.readAsText(file, 'utf-8'); });
+}
+
+/* ---------- ostatní ---------- */
+let toastT = null;
+function toast(t, err) { const el = $('toast'); el.textContent = t; el.className = 'toast show' + (err ? ' err' : ''); clearTimeout(toastT); toastT = setTimeout(() => el.className = 'toast', 2600); }
+$('who').onchange = (e) => { const v = e.target.value; if (v === '__edit') { renderWho(); setTab('pub'); setTimeout(() => $('spr-new') && $('spr-new').focus(), 50); return; } try { localStorage.setItem('opka_spravce', v); } catch (er) {} renderWho(); if (tab === 'pub') renderPub(); };
+$('b-theme').onclick = () => { const d = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = d; try { localStorage.setItem('opka_theme', d); } catch (e) {} };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('dlg').classList.remove('on'); });
+function renderWho() {
+  const cur = spravce(), w = $('who');
+  w.innerHTML = `<option value="">— vyber —</option>` + S.map((n) => `<option ${n === cur ? 'selected' : ''}>${esc(n)}</option>`).join('') + (cur && !S.includes(cur) ? `<option selected>${esc(cur)}</option>` : '') + '<option value="__edit">Upravit seznam…</option>';
+  $('who-w').classList.toggle('need', !cur);
+}
+function renderAll() { renderWho(); renderFList(); renderFEd(); renderCList(); renderCEd(); renderStatus(); }
+
+/* ---------- start ---------- */
+(function start() {
+  let d = null; try { d = JSON.parse(localStorage.getItem('opka_draft2') || 'null'); } catch (e) {}
+  if (d && d.exported && (FILE_META.verze || 0) >= d.base) { localStorage.removeItem('opka_draft2'); d = null; }   // export už je na serveru
+  if (d) {
+    F = d.F; C = d.C; S = d.S || clone(FILE_S); base = d.base; exported = !!d.exported; prep();
+    const n = $('notice');
+    if (!d.exported && (FILE_META.verze || 0) > d.base) { n.className = 'notice err'; n.innerHTML = `<b>Pozor:</b> rozpracované změny z ${esc(d.cas)} vychází z verze ${d.base}, ale na serveru je už verze ${FILE_META.verze}. Při publikování bys přepsal novější data. <button type="button" class="btn sm" id="n-discard">Zahodit a načíst verzi ${FILE_META.verze}</button>`; }
+    else if (d.exported) { n.className = 'notice warn'; n.innerHTML = `<b>Export verze ${d.base} ještě není na serveru</b> (soubory mají verzi ${FILE_META.verze || 0}). Nahraj stažené soubory.`; }
+    else { n.className = 'notice warn'; n.innerHTML = `Pokračuješ v rozpracovaných změnách z ${esc(d.cas)}. <button type="button" class="btn sm" id="n-discard">Zahodit a začít ze souborů</button>`; }
+    n.hidden = false;
+  } else fromFiles();
+  renderAll();
+})();
+$('notice').addEventListener('click', (e) => { if (e.target.closest('#n-discard')) { if (!confirm('Zahodit rozpracované změny?')) return; localStorage.removeItem('opka_draft2'); fromFiles(); curF = curC = null; renderAll(); $('notice').hidden = true; } });
+</script>
+</body>
+</html>
