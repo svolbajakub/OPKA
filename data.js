@@ -1,7 +1,7 @@
-// OPKA – data. Verze 2, 11. 10. 2026 15:28:44, Bc. Jakub Švolba, MBA
+// OPKA – data. Verze 3, 11. 10. 2026 15:30:36, Bc. Jakub Švolba, MBA
 const OPKA_META = {
-    "verze": 2,
-    "datum": "11. 10. 2026 15:28:44",
+    "verze": 3,
+    "datum": "11. 10. 2026 15:30:36",
     "spravce": "Bc. Jakub Švolba, MBA"
 };
 const OPKA_SPRAVCI = [
@@ -207,7 +207,7 @@ const firmy = [
         "nazev": "Žatecká regionální nemocnice, a.s.",
         "adresa": "Husova 2796, 438 01 Žatec",
         "okres": "Louny",
-        "kontakt": "Vrátnice - 414 110 <b> 111 </b> <br> MOJIP - 414 110 <b> 206 </b>",
+        "kontakt": "Vrátnice - 414 110 <b>111</b>\nMOJIP - 414 110 <b>206</b>",
         "zamestnanci": "120",
         "doba": "24/7",
         "charakter": "Pětipatrový lůžkový monoblok s přilehlými pavilony (laboratoře, sklady). Součástí je modernizovaný urgentní příjem a lůžková oddělení následné péče.",
@@ -215,11 +215,15 @@ const firmy = [
         "rizika": "<b> BSL1 </b> <br> Sklad a rozvod medicinálních plynů <br> Mikrobiologické laboratoře <br> Radiodiagnostické pracoviště",
         "mapa": "nemzatec.png",
         "overeno": {
-            "kdo": "",
-            "datum": "",
+            "kdo": "Bc. Jakub Švolba, MBA",
+            "datum": "2026-10-11",
             "pozn": ""
         },
-        "latky": []
+        "latky": [
+            "am241",
+            "i131",
+            "h2s"
+        ]
     },
     {
         "nazev": "RAN, s.r.o.",
