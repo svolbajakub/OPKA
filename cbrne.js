@@ -1,4 +1,4 @@
-// OPKA – CBRNE. Verze 4, 11. 10. 2026 15:31:27, Bc. Jakub Švolba, MBA
+// OPKA – CBRNE. Verze 5, 11. 10. 2026 15:51:47, Bc. Jakub Švolba, MBA
 const cbrneData = [
     {
         "id": "nh3",
