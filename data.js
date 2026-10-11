@@ -1,7 +1,7 @@
-// OPKA – data. Verze 4, 11. 10. 2026 15:31:27, Bc. Jakub Švolba, MBA
+// OPKA – data. Verze 5, 11. 10. 2026 15:51:47, Bc. Jakub Švolba, MBA
 const OPKA_META = {
-    "verze": 4,
-    "datum": "11. 10. 2026 15:31:27",
+    "verze": 5,
+    "datum": "11. 10. 2026 15:51:47",
     "spravce": "Bc. Jakub Švolba, MBA"
 };
 const OPKA_SPRAVCI = [
@@ -207,7 +207,7 @@ const firmy = [
         "nazev": "Žatecká regionální nemocnice, a.s.",
         "adresa": "Husova 2796, 438 01 Žatec",
         "okres": "Louny",
-        "kontakt": "Vrátnice - 414 110 <b>111</b>\nMOJIP - 414 110 <b>206</b>",
+        "kontakt": "Vrátnice - 414 110 111\nMOJIP - 414 110 206",
         "zamestnanci": "120",
         "doba": "24/7",
         "charakter": "Pětipatrový lůžkový monoblok s přilehlými pavilony (laboratoře, sklady). Součástí je modernizovaný urgentní příjem a lůžková oddělení následné péče.",
