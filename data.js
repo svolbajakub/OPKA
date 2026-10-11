@@ -1,11 +1,12 @@
-// OPKA – data. Generováno: 11. 10. 2026 14:55:07
+// OPKA – data. Verze 2, 11. 10. 2026 15:28:44, Bc. Jakub Švolba, MBA
 const OPKA_META = {
-    "verze": 1,
-    "datum": "11. 10. 2026 14:55:07",
-    "spravce": "převod dat (Claude) – ke kontrole"
+    "verze": 2,
+    "datum": "11. 10. 2026 15:28:44",
+    "spravce": "Bc. Jakub Švolba, MBA"
 };
 const OPKA_SPRAVCI = [
-    "Jakub Švolba"
+    "Bc. Jakub Švolba, MBA",
+    "Ing. Bc. Jan Mach"
 ];
 const firmy = [
     {
