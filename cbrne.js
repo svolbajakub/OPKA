@@ -1,4 +1,4 @@
-// OPKA – data. Generováno: 11. 10. 2026 14:55:07
+// OPKA – CBRNE. Verze 2, 11. 10. 2026 15:28:44, Bc. Jakub Švolba, MBA
 const cbrneData = [
     {
         "id": "nh3",
