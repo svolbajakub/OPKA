@@ -1,7 +1,7 @@
-// OPKA – data. Verze 3, 11. 10. 2026 15:30:36, Bc. Jakub Švolba, MBA
+// OPKA – data. Verze 4, 11. 10. 2026 15:31:27, Bc. Jakub Švolba, MBA
 const OPKA_META = {
-    "verze": 3,
-    "datum": "11. 10. 2026 15:30:36",
+    "verze": 4,
+    "datum": "11. 10. 2026 15:31:27",
     "spravce": "Bc. Jakub Švolba, MBA"
 };
 const OPKA_SPRAVCI = [
@@ -211,7 +211,7 @@ const firmy = [
         "zamestnanci": "120",
         "doba": "24/7",
         "charakter": "Pětipatrový lůžkový monoblok s přilehlými pavilony (laboratoře, sklady). Součástí je modernizovaný urgentní příjem a lůžková oddělení následné péče.",
-        "trasa": "Primárně z ul. Husova <br> Alternativní vjezd z ulice Studentská (pod výjezdovou základnou ZZS)",
+        "trasa": "Primárně z ul. Husova\nAlternativní vjezd z ulice Studentská (pod výjezdovou základnou ZZS - Studentská 1001, 438 01 Žatec)",
         "rizika": "<b> BSL1 </b> <br> Sklad a rozvod medicinálních plynů <br> Mikrobiologické laboratoře <br> Radiodiagnostické pracoviště",
         "mapa": "nemzatec.png",
         "overeno": {
